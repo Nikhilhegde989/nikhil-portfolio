@@ -72,7 +72,7 @@ export const Hero: React.FC = () => {
               Contact
             </Button>
             <Button 
-              href="/resume.pdf" 
+              href="resume.pdf" 
               download 
               icon={Download} 
               variant="outline" 
