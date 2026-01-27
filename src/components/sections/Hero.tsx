@@ -91,7 +91,7 @@ export const Hero: React.FC = () => {
             <div className="relative flex flex-col items-center gap-8">
               <div className="relative group">
                 <img 
-                  src="/images/profile.png" 
+                  src="images/profile.png" 
                   alt="Nikhil Hegde"
                   className="w-72 h-72 object-cover rounded-2xl border-2 border-slate-700 shadow-2xl transition-all duration-500 group-hover:scale-[1.02]"
                 />

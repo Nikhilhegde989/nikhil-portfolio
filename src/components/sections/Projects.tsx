@@ -20,7 +20,7 @@ export const Projects: React.FC = () => (
           <div className="h-52 overflow-hidden relative flex-shrink-0">
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent z-10 opacity-60" />
             <img 
-              src={`/images/projects/${project.id}.png`} 
+              src={`images/projects/${project.id}.png`} 
               alt={project.title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               onError={(e) => {

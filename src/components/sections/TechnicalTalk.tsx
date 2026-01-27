@@ -128,7 +128,7 @@ export const TechnicalTalk: React.FC = () => {
                 {/* Photo 1 - Presenting */}
                 <div className="group relative aspect-square rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
                   <img 
-                    src="/images/talk.jpeg" 
+                    src="images/talk.jpeg" 
                     alt="Presenting at Hyderabad PG Days"
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                   />
@@ -140,7 +140,7 @@ export const TechnicalTalk: React.FC = () => {
                 {/* Photo 2 - Event */}
                 <div className="group relative aspect-square rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
                   <img 
-                    src="/images/talk2.jpeg" 
+                    src="images/talk2.jpeg" 
                     alt="Event venue at Hyderabad PG Days"
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                   />
@@ -153,7 +153,7 @@ export const TechnicalTalk: React.FC = () => {
               {/* Row 2: Audience (Full width panoramic) */}
               <div className="group relative aspect-[21/9] rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
                 <img 
-                  src="/images/talk3.jpg" 
+                  src="images/talk3.jpg" 
                   alt="Audience at Hyderabad PG Days"
                   className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                 />
