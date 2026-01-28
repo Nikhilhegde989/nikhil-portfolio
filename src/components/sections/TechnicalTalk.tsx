@@ -38,7 +38,7 @@ export const TechnicalTalk: React.FC = () => {
             </span>
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl font-light">
-            The Hidden Engine Behind Your Transactions — Hyderabad PostgreSQL Days 2025
+            The Hidden Engine Behind Your Transactions - Hyderabad PostgreSQL Days 2025
           </p>
         </div>
 
