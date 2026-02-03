@@ -11,6 +11,7 @@ import { Certifications } from './components/sections/Certifications';
 import { Publications } from './components/sections/Publications';
 import { About } from './components/sections/About';
 import { Contact } from './components/sections/Contact';
+import { ChatWidget } from './components/ui/ChatBot/ChatWidget';
 import { useActiveSection } from './hooks/useActiveSection';
 import { navItems } from './data/portfolioData';
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
         <Contact />
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 };
