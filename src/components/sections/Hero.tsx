@@ -47,7 +47,7 @@ export const Hero: React.FC = () => {
           <div className="flex justify-center py-4">
             <div className="relative group">
               <img
-                src="images/profile.png"
+                src="images/profile.webp"
                 alt="Nikhil Hegde"
                 width="256"
                 height="256"
@@ -178,7 +178,7 @@ export const Hero: React.FC = () => {
             <div className="relative flex flex-col items-center gap-8">
               <div className="relative group">
                 <img
-                  src="images/profile.png"
+                  src="images/profile.webp"
                   alt="Nikhil Hegde"
                   width="288"
                   height="288"

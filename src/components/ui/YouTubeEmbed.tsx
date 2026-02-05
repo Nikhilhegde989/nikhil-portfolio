@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play } from 'lucide-react';
+import { Play, Loader2 } from 'lucide-react';
 
 interface YouTubeEmbedProps {
     videoId: string;
@@ -8,23 +8,37 @@ interface YouTubeEmbedProps {
 
 export const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({ videoId, title }) => {
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isIframeLoading, setIsIframeLoading] = useState(false);
+
+    const handleLoad = () => {
+        setIsLoaded(true);
+        setIsIframeLoading(true);
+    };
 
     if (isLoaded) {
         return (
-            <iframe
-                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-                title={title}
-                className="absolute inset-0 w-full h-full rounded-xl"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            />
+            <div className="absolute inset-0 w-full h-full bg-slate-900">
+                {isIframeLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
+                    </div>
+                )}
+                <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                    title={title}
+                    className="absolute inset-0 w-full h-full rounded-xl"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    onLoad={() => setIsIframeLoading(false)}
+                />
+            </div>
         );
     }
 
     return (
         <button
-            onClick={() => setIsLoaded(true)}
-            className="absolute inset-0 w-full h-full group"
+            onClick={handleLoad}
+            className="absolute inset-0 w-full h-full group bg-slate-100"
             aria-label={`Play ${title}`}
         >
             <img
