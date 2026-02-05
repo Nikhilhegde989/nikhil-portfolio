@@ -1,4 +1,5 @@
 import React from 'react';
+import { YouTubeEmbed } from '../ui/YouTubeEmbed';
 import { Play, MapPin, Calendar } from 'lucide-react';
 import { Button } from '../ui/Button';
 
@@ -30,7 +31,7 @@ export const TechnicalTalk: React.FC = () => {
             </span>
             Featured Technical Presentation
           </div>
-          
+
           <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-4 tracking-tight">
             Mastering MVCC in
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-cyan-600 mt-2">
@@ -61,11 +62,11 @@ export const TechnicalTalk: React.FC = () => {
             {/* Description */}
             <div className="space-y-4">
               <p className="text-lg text-slate-700 leading-relaxed">
-                Delivered my inaugural technical presentation at <span className="text-slate-900 font-bold">Hyderabad PG Days 2025</span>, 
+                Delivered my inaugural technical presentation at <span className="text-slate-900 font-bold">Hyderabad PG Days 2025</span>,
                 engaging with the PostgreSQL community and sharing insights on database internals from a developer's perspective.
               </p>
               <p className="text-slate-600 leading-relaxed">
-                An in-depth exploration of PostgreSQL's Multi-Version Concurrency Control system, 
+                An in-depth exploration of PostgreSQL's Multi-Version Concurrency Control system,
                 covering the fundamental mechanisms that enable PostgreSQL's renowned reliability and performance.
               </p>
             </div>
@@ -89,10 +90,10 @@ export const TechnicalTalk: React.FC = () => {
 
             {/* CTA */}
             <div className="pt-4">
-              <Button 
-                href="https://www.youtube.com/watch?v=-thlzArJhMc" 
-                external 
-                icon={Play} 
+              <Button
+                href="https://www.youtube.com/watch?v=-thlzArJhMc"
+                external
+                icon={Play}
                 className="bg-red-600 hover:bg-red-700 text-white border-0 px-8 py-3 text-base font-medium shadow-lg shadow-red-600/20 hover:shadow-red-600/30 transition-all"
               >
                 Watch Full Presentation
@@ -106,15 +107,12 @@ export const TechnicalTalk: React.FC = () => {
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400/30 to-blue-400/30 rounded-2xl blur opacity-60 group-hover:opacity-100 transition duration-1000" />
               <div className="relative aspect-video bg-white rounded-xl overflow-hidden ring-1 ring-slate-200 shadow-xl">
-                <iframe
-                  src="https://www.youtube.com/embed/-thlzArJhMc"
+                <YouTubeEmbed
+                  videoId="-thlzArJhMc"
                   title="Mastering MVCC in PostgreSQL - Technical Talk"
-                  className="absolute inset-0 w-full h-full"
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
                 {/* Platform Badge */}
-                <div className="absolute top-3 right-3 bg-black/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white font-medium border border-white/20 flex items-center gap-2">
+                <div className="absolute top-3 right-3 pointer-events-none bg-black/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-white font-medium border border-white/20 flex items-center gap-2 z-10">
                   <span className="w-2 h-2 rounded-full bg-red-500" />
                   YouTube
                 </div>
@@ -127,9 +125,10 @@ export const TechnicalTalk: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 {/* Photo 1 - Presenting */}
                 <div className="group relative aspect-square rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
-                  <img 
-                    src="images/talk.jpeg" 
+                  <img
+                    src="images/talk.jpeg"
                     alt="Presenting at Hyderabad PG Days"
+                    loading="lazy"
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/0 to-slate-900/0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-start p-3">
@@ -139,9 +138,10 @@ export const TechnicalTalk: React.FC = () => {
 
                 {/* Photo 2 - Event */}
                 <div className="group relative aspect-square rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
-                  <img 
-                    src="images/talk2.jpeg" 
+                  <img
+                    src="images/talk2.jpeg"
                     alt="Event venue at Hyderabad PG Days"
+                    loading="lazy"
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/0 to-slate-900/0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-start p-3">
@@ -152,9 +152,10 @@ export const TechnicalTalk: React.FC = () => {
 
               {/* Row 2: Audience (Full width panoramic) */}
               <div className="group relative aspect-[21/9] rounded-lg overflow-hidden ring-1 ring-slate-200 bg-slate-100 cursor-pointer shadow-sm hover:shadow-md transition-shadow">
-                <img 
-                  src="images/talk3.jpg" 
+                <img
+                  src="images/talk3.jpg"
                   alt="Audience at Hyderabad PG Days"
+                  loading="lazy"
                   className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-slate-900/0 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-start p-4">
