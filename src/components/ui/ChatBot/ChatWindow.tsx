@@ -23,6 +23,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
     ]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState<string>('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -47,14 +48,50 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
         setMessages(prev => [...prev, newMessage]);
         setInputValue('');
         setIsLoading(true);
+        setLoadingStatus('Rephrasing your question for better context...');
 
         try {
+            // 1. Rephrase user question for better context
+            // Format history for the API: [[role, content], [role, content]]
+            const history = messages.map(msg => [
+                msg.sender === 'user' ? 'user' : 'assistant',
+                msg.text
+            ]);
+
+            const rephraseResponse = await fetch('https://portfolio-rag-chatbot-mzyf.onrender.com/rephrase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: userMessageText,
+                    history: history
+                }),
+            });
+
+            if (!rephraseResponse.ok) {
+                console.warn('Rephrase failed, falling back to original message');
+            }
+
+            let messageToSend = userMessageText;
+            try {
+                const rephraseData = await rephraseResponse.json();
+                if (rephraseData.rephrased_question) {
+                    messageToSend = rephraseData.rephrased_question;
+                }
+            } catch (e) {
+                console.error('Error parsing rephrase response:', e);
+            }
+
+            // 2. Send (potentially rephrased) question to RAG
+            setLoadingStatus('Retrieving relevant info...');
+
             const response = await fetch('https://portfolio-rag-chatbot-mzyf.onrender.com/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: userMessageText }),
+                body: JSON.stringify({ message: messageToSend }),
             });
 
             if (!response.ok) {
@@ -83,6 +120,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
             setMessages(prev => [...prev, errorResponse]);
         } finally {
             setIsLoading(false);
+            setLoadingStatus('');
         }
     };
 
@@ -165,16 +203,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
                 ))}
 
                 {/* Typing Indicator */}
+                {/* Typing Indicator */}
                 {isLoading && (
                     <div className="flex items-start gap-2 flex-row">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-green-100 text-green-600">
                             <Bot size={14} />
                         </div>
                         <div className="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-slate-100">
-                            <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex space-x-1">
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                                </div>
+                                {loadingStatus && (
+                                    <span className="text-xs text-slate-400 animate-pulse">{loadingStatus}</span>
+                                )}
                             </div>
                         </div>
                     </div>
