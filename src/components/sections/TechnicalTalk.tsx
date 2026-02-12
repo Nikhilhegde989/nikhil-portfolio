@@ -77,13 +77,13 @@ export const TechnicalTalk: React.FC = () => {
               <div className="grid sm:grid-cols-2 gap-3">
                 {topics.slice(0, 6).map((topic, idx) => (
                   <div key={idx} className="group flex items-start gap-3 p-3 rounded-lg bg-white hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-200 shadow-sm hover:shadow-md transition-all duration-300">
-                    <span className="text-emerald-600/40 group-hover:text-emerald-600 font-mono text-xs mt-0.5 font-bold transition-colors">0{idx + 1}</span>
+                    <span className="text-emerald-700 group-hover:text-emerald-600 font-mono text-xs mt-0.5 font-bold transition-colors">0{idx + 1}</span>
                     <span className="text-slate-600 text-sm leading-snug group-hover:text-slate-900 transition-colors">{topic}</span>
                   </div>
                 ))}
               </div>
               <div className="mt-3 p-3 rounded-lg bg-white border border-slate-200 shadow-sm">
-                <span className="text-emerald-600/40 font-mono text-xs mr-3 font-bold">07</span>
+                <span className="text-emerald-700 font-mono text-xs mr-3 font-bold">07</span>
                 <span className="text-slate-600 text-sm">{topics[6]}</span>
               </div>
             </div>

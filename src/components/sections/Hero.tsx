@@ -52,6 +52,9 @@ export const Hero: React.FC = () => {
                 width="256"
                 height="256"
                 className="w-64 h-64 object-cover rounded-2xl border-2 border-slate-700 shadow-2xl"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
               <div className="absolute -bottom-4 -right-4 bg-emerald-500 w-6 h-6 rounded-full border-4 border-slate-900 animate-pulse"></div>
             </div>
@@ -183,6 +186,9 @@ export const Hero: React.FC = () => {
                   width="288"
                   height="288"
                   className="w-72 h-72 object-cover rounded-2xl border-2 border-slate-700 shadow-2xl transition-all duration-500 group-hover:scale-[1.02]"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
                 <div className="absolute -bottom-4 -right-4 bg-emerald-500 w-6 h-6 rounded-full border-4 border-slate-900 animate-pulse"></div>
               </div>

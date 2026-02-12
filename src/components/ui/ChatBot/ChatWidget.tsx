@@ -47,10 +47,10 @@ export const ChatWidget: React.FC = () => {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 pointer-events-none">
             {/* Tooltip */}
             <div
-                className={`transition-all duration-500 transform ${showTooltip && !isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
+                className={`transition-all duration-500 transform ${showTooltip && !isOpen ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 translate-x-4 pointer-events-none'
                     }`}
             >
                 <div className="bg-white text-slate-800 px-4 py-2 rounded-xl shadow-lg border border-slate-100 text-sm font-medium relative mr-2">
@@ -62,8 +62,8 @@ export const ChatWidget: React.FC = () => {
             {/* Search/Chat Window */}
             <div
                 className={`transition-all duration-300 origin-bottom-right transform ${isOpen
-                        ? 'scale-100 opacity-100 translate-y-0'
-                        : 'scale-90 opacity-0 translate-y-8 pointer-events-none'
+                    ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto'
+                    : 'scale-90 opacity-0 translate-y-8 pointer-events-none'
                     }`}
             >
                 <ChatWindow onClose={() => setIsOpen(false)} />
@@ -73,8 +73,8 @@ export const ChatWidget: React.FC = () => {
             <button
                 onClick={handleToggle}
                 className={`group relative p-4 rounded-full shadow-xl shadow-blue-500/30 transition-all duration-300 flex items-center justify-center hover:scale-110 active:scale-95 ${isOpen
-                        ? 'bg-slate-800 rotate-90 opacity-0 pointer-events-none absolute'
-                        : 'bg-gradient-to-r from-blue-600 to-violet-600'
+                    ? 'bg-slate-800 rotate-90 opacity-0 pointer-events-none absolute'
+                    : 'bg-gradient-to-r from-blue-600 to-violet-600 pointer-events-auto'
                     } ${shouldBounce ? 'animate-bounce' : ''}`}
                 aria-label="Open chat"
             >

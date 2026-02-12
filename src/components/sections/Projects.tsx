@@ -36,6 +36,8 @@ export const Projects: React.FC = () => (
                 target="_blank"
                 rel="noopener noreferrer"
                 className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-slate-900/60 backdrop-blur-sm"
+                aria-hidden="true"
+                tabIndex={-1}
               >
                 <span className="flex items-center gap-2 text-white font-medium px-4 py-2 bg-emerald-600 rounded-full hover:bg-emerald-500 transition-colors">
                   View Project <ExternalLink size={16} />

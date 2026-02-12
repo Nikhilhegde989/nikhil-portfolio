@@ -161,6 +161,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
                 <button
                     onClick={onClose}
                     className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                    aria-label="Close chat"
                 >
                     <X size={18} />
                 </button>
@@ -180,7 +181,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
                             ) : (
                                 <div className="relative w-full h-full">
                                     <img
-                                        src="images/profile.png"
+                                        src="images/profile.webp"
                                         alt="Bot"
                                         className="w-full h-full object-cover opacity-80 mix-blend-luminosity"
                                     />
@@ -242,6 +243,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
                         onClick={handleSend}
                         disabled={!inputValue.trim() || isLoading}
                         className="p-1.5 bg-blue-600 text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
+                        aria-label="Send message"
                     >
                         <Send size={14} />
                     </button>
