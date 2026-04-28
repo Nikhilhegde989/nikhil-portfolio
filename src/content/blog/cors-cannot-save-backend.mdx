@@ -7,8 +7,6 @@ readingTime: 12
 featured: false
 ---
 
-import { CORSDemo } from '../../components/blog/CORSDemo';
-import { PreflightDemo } from '../../components/blog/PreflightDemo';
 
 ## 1. The Common Misconception About CORS
 
@@ -91,7 +89,7 @@ The user sees an error on screen. The money is already gone from the database. Y
 
 Below is an interactive visualization of three scenarios. All have a frontend making a request to a backend that has CORS configured. Step through each one and watch what happens in the browser versus what happens in the backend terminal.
 
-<CORSDemo client:load />
+*[ Interactive demo coming soon — will show browser vs backend behaviour across all three scenarios ]*
 
 ---
 
@@ -142,7 +140,7 @@ In practice, almost every real API call carries either `application/json` or an 
 
 Yes — but only in one specific scenario. Preflight protects against **state-changing requests from a malicious cross-origin website in a browser**. The demo below shows all three preflight cases:
 
-<PreflightDemo client:load />
+*[ Interactive preflight demo coming soon — will cover simple GET, POST with application/json, and GET with Authorization header ]*
 
 ### Where Preflight Completely Fails
 
