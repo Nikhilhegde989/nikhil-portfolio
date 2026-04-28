@@ -1,0 +1,134 @@
+---
+title: "FastAPI in Production: What I Wish I Knew Earlier"
+summary: "Async pitfalls, connection pool tuning, middleware ordering, and a few things that silently hurt performance until they suddenly didn't."
+publishedAt: 2025-02-10
+tags: ["fastapi", "python", "performance"]
+readingTime: 5
+featured: false
+---
+
+After running FastAPI in production for over a year, here are the things that actually bit me — not the stuff the "getting started" tutorials cover.
+
+## Don't Mix Sync and Async Database Calls
+
+This sounds obvious but it's easy to miss. SQLAlchemy has both sync and async session interfaces. Using the sync session inside an async route makes FastAPI run it in a thread pool — which is fine in isolation, but if you're also holding async connections, you've got two pools competing for the same database server limit.
+
+Pick one and be consistent. We use `AsyncSession` everywhere:
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+
+engine = create_async_engine(
+    "postgresql+asyncpg://user:pass@host/db",
+    pool_size=20,
+    max_overflow=10,
+    pool_pre_ping=True,
+)
+```
+
+`pool_pre_ping=True` is not optional in production. Without it, stale connections after a database restart or a network blip cause random 500 errors that are maddening to debug.
+
+## Tune the Connection Pool
+
+The default `pool_size=5` is almost always too small. Under real traffic you'll see `QueuePool limit of size 5 overflow 10 reached` and requests start queuing or dropping.
+
+Rule of thumb: `pool_size` ≈ (number of async workers) × (average concurrent DB calls per request). Start here and watch `pg_stat_activity`:
+
+```python
+engine = create_async_engine(
+    DATABASE_URL,
+    pool_size=20,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800,  # recycle connections every 30 minutes
+)
+```
+
+`pool_recycle` prevents connections from going stale on long-lived servers.
+
+## Middleware Ordering Is Backwards
+
+FastAPI middleware executes in **reverse registration order**. The last middleware you add is the outermost wrapper. If you register `CORSMiddleware` *after* `AuthMiddleware`, CORS runs first.
+
+This matters because OPTIONS preflight requests need CORS headers before auth even runs. If your auth middleware returns 401 before CORS headers are attached, cross-origin preflight fails silently.
+
+Correct order:
+
+```python
+# Auth runs second (inner), CORS runs first (outer)
+app.add_middleware(AuthMiddleware)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+```
+
+## Dependency Scope Is Per-Request
+
+FastAPI's `Depends()` with `yield` creates a fresh instance per request. This is correct for database sessions:
+
+```python
+async def get_db():
+    async with AsyncSession(engine) as session:
+        yield session
+
+@app.get("/orders")
+async def list_orders(db: AsyncSession = Depends(get_db)):
+    ...
+```
+
+The trap: caching a dependency at module level and sharing it across requests. If the cached object holds any state — an open connection, a lock, a cursor — you get race conditions that only appear under load.
+
+## Background Tasks vs. a Real Queue
+
+FastAPI's `BackgroundTasks` is useful for fire-and-forget work (send an email, push to analytics):
+
+```python
+@app.post("/orders")
+async def create_order(tasks: BackgroundTasks):
+    order = await db.create_order(...)
+    tasks.add_task(send_confirmation_email, order.id)
+    return order
+```
+
+But `BackgroundTasks` runs in the same event loop as your app. A slow or crashing background task affects your main request handlers. For anything that needs retries, guaranteed delivery, or significant CPU, use Celery or a proper task queue.
+
+## The Blocking Code Trap
+
+Python's asyncio is cooperative. A single blocking call — a CPU-heavy loop, a sync library, even `time.sleep(1)` — blocks the **entire** event loop. All concurrent requests stall until it returns.
+
+The fix is `asyncio.to_thread()` (Python 3.9+):
+
+```python
+import asyncio
+
+async def process_report(path: str):
+    # Run CPU-heavy work in a thread pool, freeing the event loop
+    result = await asyncio.to_thread(generate_pdf, path)
+    return result
+```
+
+Or for more control, use a dedicated `ThreadPoolExecutor`:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(max_workers=10)
+
+async def process_report(path: str):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(executor, generate_pdf, path)
+```
+
+## Quick Wins I Always Apply
+
+```python
+# Clean up OpenAPI docs — hide internal endpoints
+@app.get("/internal/metrics", include_in_schema=False)
+async def metrics(): ...
+
+# Don't serialize null fields in responses
+@app.get("/orders/{id}", response_model=OrderResponse, response_model_exclude_unset=True)
+async def get_order(id: str): ...
+```
+
+Always add a `/health` endpoint that actually checks your database connection — load balancers and orchestrators depend on it. Use `lifespan` for startup/shutdown logic instead of the deprecated `@app.on_event`.
+
+FastAPI is genuinely excellent. Most of its pitfalls come from not understanding Python's async model deeply enough. Once that clicks, the rest is mechanical.

@@ -1,0 +1,284 @@
+---
+import { getCollection } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+const allPosts = await getCollection('blog');
+const sorted = allPosts.sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+);
+
+const featured = sorted.find((p) => p.data.featured);
+const others = sorted.filter((p) => !p.data.featured);
+const allTags = [...new Set(sorted.flatMap((p) => p.data.tags))];
+
+const tagGradients: Record<string, string> = {
+  postgresql: 'from-blue-600 via-blue-800 to-indigo-900',
+  internals: 'from-violet-600 via-purple-800 to-indigo-900',
+  performance: 'from-emerald-500 via-green-700 to-teal-900',
+  python: 'from-amber-500 via-orange-600 to-orange-900',
+  fastapi: 'from-teal-500 via-emerald-700 to-cyan-900',
+  kafka: 'from-orange-500 via-red-600 to-rose-900',
+  websockets: 'from-purple-600 via-violet-700 to-indigo-900',
+  architecture: 'from-cyan-500 via-sky-700 to-blue-900',
+  redis: 'from-red-500 via-rose-700 to-red-900',
+  security: 'from-rose-600 via-red-700 to-rose-900',
+  cors: 'from-amber-500 via-orange-600 to-red-900',
+  web: 'from-sky-500 via-blue-700 to-indigo-900',
+  backend: 'from-slate-500 via-slate-700 to-slate-900',
+};
+
+const tagColors: Record<string, string> = {
+  postgresql: 'bg-blue-950/60 text-blue-300 border-blue-800/50',
+  internals: 'bg-violet-950/60 text-violet-300 border-violet-800/50',
+  performance: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/50',
+  python: 'bg-amber-950/60 text-amber-300 border-amber-800/50',
+  fastapi: 'bg-teal-950/60 text-teal-300 border-teal-800/50',
+  kafka: 'bg-orange-950/60 text-orange-300 border-orange-800/50',
+  websockets: 'bg-purple-950/60 text-purple-300 border-purple-800/50',
+  architecture: 'bg-cyan-950/60 text-cyan-300 border-cyan-800/50',
+  redis: 'bg-red-950/60 text-red-300 border-red-800/50',
+  security: 'bg-rose-950/60 text-rose-300 border-rose-800/50',
+  cors: 'bg-orange-950/60 text-orange-300 border-orange-800/50',
+  web: 'bg-sky-950/60 text-sky-300 border-sky-800/50',
+  backend: 'bg-slate-900/60 text-slate-300 border-slate-700/50',
+};
+
+function gradient(tags: string[]) {
+  for (const t of tags) if (tagGradients[t]) return tagGradients[t];
+  return 'from-slate-700 via-slate-800 to-slate-900';
+}
+
+function tagClass(tag: string) {
+  return tagColors[tag] ?? 'bg-slate-900/60 text-slate-300 border-slate-700/50';
+}
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+const icons: Record<string, string> = {
+  postgresql: `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>`,
+  kafka: `<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>`,
+  fastapi: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>`,
+  websockets: `<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/>`,
+  python: `<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/>`,
+  default: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+};
+
+function icon(tags: string[]) {
+  for (const t of tags) if (icons[t]) return icons[t];
+  return icons.default;
+}
+---
+
+<BlogLayout
+  title="Writing"
+  description="Technical deep-dives into backend systems, PostgreSQL internals, distributed architecture, and lessons from real production traffic."
+  currentPath="/blog"
+>
+  <main class="pt-24 pb-32">
+    <!-- Hero -->
+    <section class="max-w-6xl mx-auto px-6 pt-14 pb-14">
+      <p class="text-emerald-400 text-xs font-mono tracking-[0.22em] uppercase mb-5">Writing</p>
+      <h1
+        class="text-6xl md:text-8xl font-bold text-white leading-[1.0] mb-6"
+        style="font-family: 'Fraunces', Georgia, serif;"
+      >
+        Engineering<br /><span class="text-slate-500">Insights.</span>
+      </h1>
+      <p class="text-slate-400 text-lg max-w-lg leading-relaxed">
+        Deep dives into backend systems, PostgreSQL internals, distributed architecture,
+        and lessons from real production traffic.
+      </p>
+    </section>
+
+    <!-- Tag filter -->
+    <section class="max-w-6xl mx-auto px-6 mb-14">
+      <div class="flex gap-2.5 flex-wrap">
+        <button class="tag-btn" data-tag="all" data-active="true">All Posts</button>
+        {allTags.map((tag) => (
+          <button class="tag-btn" data-tag={tag}>{capitalize(tag)}</button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Posts grid — featured spans full width, others fill 2/3-col grid -->
+    <section class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-5" id="posts-grid">
+
+        <!-- Featured post -->
+        {featured && (
+          <a
+            href={`/blog/${featured.slug}`}
+            class="post-card col-span-full xl:flex rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-300 hover:shadow-[0_0_50px_rgba(16,185,129,0.07)] group"
+            data-tags={JSON.stringify(featured.data.tags)}
+          >
+            <!-- Gradient thumbnail -->
+            <div class={`bg-gradient-to-br ${gradient(featured.data.tags)} xl:w-[42%] flex items-center justify-center relative overflow-hidden min-h-72 xl:min-h-auto`}>
+              <svg class="absolute inset-0 w-full h-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid-feat" width="44" height="44" patternUnits="userSpaceOnUse">
+                    <path d="M 44 0 L 0 0 0 44" fill="none" stroke="white" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-feat)" />
+              </svg>
+              <svg
+                class="w-36 h-36 text-white/[0.18] relative z-10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="0.7"
+                set:html={icon(featured.data.tags)}
+              />
+              <div class="absolute top-4 left-4 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-widest uppercase">
+                Featured
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="xl:w-[58%] p-8 xl:p-12 flex flex-col justify-center bg-white/[0.02]">
+              <div class="flex gap-2 flex-wrap mb-5">
+                {featured.data.tags.map((t) => (
+                  <span class={`text-xs font-medium px-2.5 py-1 rounded-full border ${tagClass(t)}`}>
+                    {capitalize(t)}
+                  </span>
+                ))}
+              </div>
+              <h2
+                class="text-2xl xl:text-3xl font-bold text-white mb-4 leading-snug group-hover:text-emerald-400 transition-colors"
+                style="font-family: 'Fraunces', Georgia, serif;"
+              >
+                {featured.data.title}
+              </h2>
+              <p class="text-slate-400 text-base leading-relaxed mb-7">{featured.data.summary}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600 text-sm">
+                  {fmtDate(featured.data.publishedAt)} · {featured.data.readingTime} min read
+                </span>
+                <span class="text-emerald-400 text-sm font-medium flex items-center gap-1.5 group-hover:gap-3 transition-all">
+                  Read Post
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </a>
+        )}
+
+        <!-- Other posts -->
+        {others.map((post) => (
+          <a
+            href={`/blog/${post.slug}`}
+            class="post-card flex flex-col rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.06)] group"
+            data-tags={JSON.stringify(post.data.tags)}
+          >
+            <!-- Gradient thumbnail -->
+            <div class={`bg-gradient-to-br ${gradient(post.data.tags)} h-48 flex items-center justify-center relative overflow-hidden flex-shrink-0`}>
+              <svg class="absolute inset-0 w-full h-full opacity-[0.07]" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id={`grid-${post.slug}`} width="32" height="32" patternUnits="userSpaceOnUse">
+                    <path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill={`url(#grid-${post.slug})`} />
+              </svg>
+              <svg
+                class="w-24 h-24 text-white/[0.18] relative z-10"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="0.7"
+                set:html={icon(post.data.tags)}
+              />
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 flex flex-col flex-1 bg-white/[0.02]">
+              <div class="flex gap-2 flex-wrap mb-3">
+                {post.data.tags.map((t) => (
+                  <span class={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${tagClass(t)}`}>
+                    {capitalize(t)}
+                  </span>
+                ))}
+              </div>
+              <h3
+                class="text-[1.1rem] font-bold text-white mb-2 leading-snug group-hover:text-emerald-400 transition-colors flex-1"
+                style="font-family: 'Fraunces', Georgia, serif;"
+              >
+                {post.data.title}
+              </h3>
+              <p class="text-slate-500 text-sm leading-relaxed mb-5 line-clamp-3">{post.data.summary}</p>
+              <div class="flex items-center justify-between border-t border-white/[0.06] pt-4 mt-auto">
+                <span class="text-slate-600 text-xs">
+                  {fmtDate(post.data.publishedAt)} · {post.data.readingTime} min read
+                </span>
+                <span class="text-emerald-400 text-xs font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Read →
+                </span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- Empty state -->
+      <p id="no-posts" class="text-slate-600 text-center py-16 hidden">
+        No posts tagged with that topic yet.
+      </p>
+    </section>
+  </main>
+</BlogLayout>
+
+<style>
+  .tag-btn {
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: #64748b;
+  }
+  .tag-btn[data-active="true"] {
+    background: white;
+    color: #0f172a;
+    border-color: white;
+  }
+  .tag-btn:hover:not([data-active="true"]) {
+    color: #e2e8f0;
+    border-color: rgba(255,255,255,0.25);
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.tag-btn');
+  const cards = document.querySelectorAll<HTMLElement>('.post-card');
+  const noPostsMsg = document.getElementById('no-posts');
+
+  function filterPosts(tag: string) {
+    let visible = 0;
+    cards.forEach((card) => {
+      const tags: string[] = JSON.parse(card.dataset.tags ?? '[]');
+      const show = tag === 'all' || tags.includes(tag);
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (noPostsMsg) noPostsMsg.classList.toggle('hidden', visible > 0);
+  }
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach((b) => delete b.dataset.active);
+      btn.dataset.active = 'true';
+      filterPosts(btn.dataset.tag ?? 'all');
+    });
+  });
+</script>

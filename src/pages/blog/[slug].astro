@@ -1,0 +1,242 @@
+---
+import { getCollection } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const allPosts = await getCollection('blog');
+const sorted = allPosts.sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+);
+const currentIdx = sorted.findIndex((p) => p.slug === post.slug);
+const prevPost = sorted[currentIdx + 1];
+const nextPost = sorted[currentIdx - 1];
+
+const tagGradients: Record<string, string> = {
+  postgresql: 'from-blue-600 via-blue-800 to-indigo-900',
+  internals: 'from-violet-600 via-purple-800 to-indigo-900',
+  performance: 'from-emerald-500 via-green-700 to-teal-900',
+  python: 'from-amber-500 via-orange-600 to-orange-900',
+  fastapi: 'from-teal-500 via-emerald-700 to-cyan-900',
+  kafka: 'from-orange-500 via-red-600 to-rose-900',
+  websockets: 'from-purple-600 via-violet-700 to-indigo-900',
+  architecture: 'from-cyan-500 via-sky-700 to-blue-900',
+  redis: 'from-red-500 via-rose-700 to-red-900',
+  security: 'from-rose-600 via-red-700 to-rose-900',
+  cors: 'from-amber-500 via-orange-600 to-red-900',
+  web: 'from-sky-500 via-blue-700 to-indigo-900',
+  backend: 'from-slate-500 via-slate-700 to-slate-900',
+};
+
+const tagColors: Record<string, string> = {
+  postgresql: 'bg-blue-950/60 text-blue-300 border-blue-800/50',
+  internals: 'bg-violet-950/60 text-violet-300 border-violet-800/50',
+  performance: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/50',
+  python: 'bg-amber-950/60 text-amber-300 border-amber-800/50',
+  fastapi: 'bg-teal-950/60 text-teal-300 border-teal-800/50',
+  kafka: 'bg-orange-950/60 text-orange-300 border-orange-800/50',
+  websockets: 'bg-purple-950/60 text-purple-300 border-purple-800/50',
+  architecture: 'bg-cyan-950/60 text-cyan-300 border-cyan-800/50',
+  redis: 'bg-red-950/60 text-red-300 border-red-800/50',
+  security: 'bg-rose-950/60 text-rose-300 border-rose-800/50',
+  cors: 'bg-orange-950/60 text-orange-300 border-orange-800/50',
+  web: 'bg-sky-950/60 text-sky-300 border-sky-800/50',
+  backend: 'bg-slate-900/60 text-slate-300 border-slate-700/50',
+};
+
+const icons: Record<string, string> = {
+  postgresql: `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>`,
+  kafka: `<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>`,
+  fastapi: `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>`,
+  websockets: `<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/>`,
+  default: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
+};
+
+function gradient(tags: string[]) {
+  for (const t of tags) if (tagGradients[t]) return tagGradients[t];
+  return 'from-slate-700 via-slate-800 to-slate-900';
+}
+
+function tagClass(tag: string) {
+  return tagColors[tag] ?? 'bg-slate-900/60 text-slate-300 border-slate-700/50';
+}
+
+function icon(tags: string[]) {
+  for (const t of tags) if (icons[t]) return icons[t];
+  return icons.default;
+}
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function capitalize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+---
+
+<BlogLayout
+  title={post.data.title}
+  description={post.data.summary}
+  type="article"
+  publishedAt={post.data.publishedAt}
+  currentPath={`/blog/${post.slug}`}
+>
+  <!-- Reading progress bar -->
+  <div id="progress-bar" class="fixed top-16 left-0 h-[2px] bg-emerald-400 z-40 w-0 transition-none"></div>
+
+  <main class="pt-20 pb-32">
+    <!-- Back link -->
+    <div class="max-w-3xl mx-auto px-6 pt-10 mb-10">
+      <a
+        href="/blog"
+        class="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-400 text-sm transition-colors group"
+      >
+        <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        All Posts
+      </a>
+    </div>
+
+    <!-- Post header -->
+    <header class="max-w-3xl mx-auto px-6 mb-10">
+      <div class="flex gap-2 flex-wrap mb-5">
+        {post.data.tags.map((t) => (
+          <span class={`text-xs font-medium px-2.5 py-1 rounded-full border ${tagClass(t)}`}>
+            {capitalize(t)}
+          </span>
+        ))}
+      </div>
+
+      <h1
+        class="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-5"
+        style="font-family: 'Fraunces', Georgia, serif;"
+      >
+        {post.data.title}
+      </h1>
+
+      <p class="text-slate-400 text-lg leading-relaxed mb-8">{post.data.summary}</p>
+
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+          NH
+        </div>
+        <div>
+          <p class="text-white text-sm font-medium">Nikhil Hegde</p>
+          <p class="text-slate-500 text-xs">
+            {fmtDate(post.data.publishedAt)} &middot; {post.data.readingTime} min read
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero gradient banner -->
+    <div class={`bg-gradient-to-br ${gradient(post.data.tags)} relative overflow-hidden mb-14`} style="height: 340px;">
+      <svg class="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid-post" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid-post)" />
+      </svg>
+      <!-- Subtle radial glow -->
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
+      <svg
+        class="absolute inset-0 m-auto w-52 h-52 text-white/[0.12]"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="0.5"
+        set:html={icon(post.data.tags)}
+      />
+    </div>
+
+    <!-- Article body -->
+    <article class="max-w-3xl mx-auto px-6">
+      <div
+        class="prose prose-invert prose-lg max-w-none
+               prose-headings:font-bold prose-headings:text-white
+               prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
+               prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+               prose-p:text-slate-300 prose-p:leading-relaxed
+               prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
+               prose-strong:text-white
+               prose-code:text-emerald-300 prose-code:bg-white/[0.06] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+               prose-pre:bg-[#0d0d1a] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
+               prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400
+               prose-li:text-slate-300 prose-li:marker:text-emerald-500
+               prose-hr:border-white/[0.08]"
+      >
+        <Content />
+      </div>
+    </article>
+
+    <!-- Tags footer -->
+    <div class="max-w-3xl mx-auto px-6 mt-14 pt-8 border-t border-white/[0.06]">
+      <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">Tagged in</p>
+      <div class="flex gap-2 flex-wrap">
+        {post.data.tags.map((t) => (
+          <a
+            href={`/blog`}
+            class={`text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 ${tagClass(t)}`}
+          >
+            {capitalize(t)}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- Prev / Next -->
+    {(prevPost || nextPost) && (
+      <div class="max-w-3xl mx-auto px-6 mt-14">
+        <div class="grid grid-cols-2 gap-4">
+          {prevPost ? (
+            <a
+              href={`/blog/${prevPost.slug}`}
+              class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all"
+            >
+              <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">← Older</p>
+              <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
+                {prevPost.data.title}
+              </p>
+            </a>
+          ) : <div />}
+
+          {nextPost ? (
+            <a
+              href={`/blog/${nextPost.slug}`}
+              class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all text-right"
+            >
+              <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">Newer →</p>
+              <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
+                {nextPost.data.title}
+              </p>
+            </a>
+          ) : <div />}
+        </div>
+      </div>
+    )}
+  </main>
+</BlogLayout>
+
+<script>
+  const bar = document.getElementById('progress-bar') as HTMLElement | null;
+  if (bar) {
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = total > 0 ? `${Math.min((scrolled / total) * 100, 100)}%` : '0%';
+    }, { passive: true });
+  }
+</script>

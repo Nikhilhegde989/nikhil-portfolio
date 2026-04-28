@@ -9,7 +9,8 @@ export const navItems: NavItem[] = [
   { href: '#certifications', label: 'Certifications' },
   { href: '#publications', label: 'Research' },
   { href: '#about', label: 'About' },
-  { href: '#contact', label: 'Contact' }
+  { href: '#contact', label: 'Contact' },
+  { href: '/blog', label: 'Blog' },
 ];
 
 export const experiences: Experience[] = [
