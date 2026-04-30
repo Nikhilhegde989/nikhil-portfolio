@@ -5,10 +5,11 @@ publishedAt: 2025-04-28
 tags: ["security", "cors", "web", "backend"]
 readingTime: 12
 featured: false
+thumbnail: "/blog/cors-thumbnail.png"
 ---
 
 
-## 1. The Common Misconception About CORS
+## The Common Misconception About CORS
 
 I was building an AI application — a public-facing API meant to serve only the users who visit my website. No login, no authentication, just open access for anyone landing on my frontend.
 
@@ -40,7 +41,7 @@ That's when it clicked. **CORS was never blocking the request. It was never mean
 
 ---
 
-## 2. What CORS Actually Is and How It Really Works
+## What CORS Actually Is and How It Really Works
 
 CORS stands for **Cross-Origin Resource Sharing**, and the most important thing to understand about it is that it is a **browser feature**. Not a server feature. Not a security layer for your backend.
 
@@ -85,15 +86,37 @@ The user sees an error on screen. The money is already gone from the database. Y
 
 ---
 
-## 3. See It Yourself — Interactive Demo
+## See It Yourself — Interactive Demo
 
-Below is an interactive visualization of three scenarios. All have a frontend making a request to a backend that has CORS configured. Step through each one and watch what happens in the browser versus what happens in the backend terminal.
+Below are three scenarios. All have a frontend making a request to a backend that has CORS configured. Watch what happens in the browser versus what happens in the backend terminal.
 
-*[ Interactive demo coming soon — will show browser vs backend behaviour across all three scenarios ]*
+**Scenario A — Origin blocked in browser**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/A-origin-blocked.mp4" type="video/mp4" />
+</video>
+
+The browser throws a CORS error — but check the backend logs. The request arrived, was processed, and a response was sent. The browser just blocked your JavaScript from reading it.
+
+**Scenario B — Origin allowed**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/B-origin-allowed.mp4" type="video/mp4" />
+</video>
+
+When the origin matches the whitelist, the browser receives the response normally. Same backend logic — just a different header in the response.
+
+**Scenario C — curl spoofing the Origin header**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/C-curl-spoofing-bypass.mp4" type="video/mp4" />
+</video>
+
+curl fabricates the `Origin` header, the backend does a string comparison and responds with full data. CORS is entirely irrelevant — because it is a browser feature.
 
 ---
 
-## 4. Preflight Requests — The Browser's Safety Check
+## Preflight Requests — The Browser's Safety Check
 
 At this point you might be thinking: *"Wait, we have preflight requests. The browser sends an OPTIONS request first, checks whether the origin is allowed, and if not — blocks the actual request before it reaches the backend. That saves us, doesn't it?"*
 
@@ -140,7 +163,37 @@ In practice, almost every real API call carries either `application/json` or an 
 
 Yes — but only in one specific scenario. Preflight protects against **state-changing requests from a malicious cross-origin website in a browser**. The demo below shows all three preflight cases:
 
-*[ Interactive preflight demo coming soon — will cover simple GET, POST with application/json, and GET with Authorization header ]*
+**Scenario D — Simple GET (no preflight)**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/D-get-without-preflight.mp4" type="video/mp4" />
+</video>
+
+A plain GET with no custom headers is a simple request. The browser fires it directly — no OPTIONS check. The backend receives it regardless of origin.
+
+**Scenario E — POST with `application/json` triggers preflight, gets blocked**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/E-post-preflight-block.mp4" type="video/mp4" />
+</video>
+
+The `application/json` content type pushes this out of the simple-request category. Preflight fires — and when the origin is not allowed, the OPTIONS response carries no approval. The actual POST never reaches the backend.
+
+**Scenario F — GET with `Authorization` header triggers preflight, gets blocked**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/F-get+auth-preflight-block.mp4" type="video/mp4" />
+</video>
+
+Adding a custom header to a GET is enough to trigger preflight. Even a read request can be blocked before the backend ever sees it — as long as auth headers are present and the origin is not whitelisted.
+
+**Scenario G — Preflight succeeds, request goes through**
+
+<video controls muted playsinline style="width: 100%; border-radius: 8px; margin: 1rem 0;">
+  <source src="/videos/G-preflight-success.mp4" type="video/mp4" />
+</video>
+
+Origin is whitelisted, server approves the OPTIONS request, browser fires the actual request. The full round-trip works as expected.
 
 ### Where Preflight Completely Fails
 
@@ -165,7 +218,7 @@ Preflight fires, server approves everything, browser allows the actual request. 
 
 ---
 
-## 5. HTTP Methods — Why This Is Not Just a Convention
+## HTTP Methods — Why This Is Not Just a Convention
 
 Most developers treat HTTP methods as a convention. GET, POST, PUT, DELETE — sure, REST says use them correctly, but at the end of the day you can fetch data with a POST or delete something with a GET and it works fine. The application doesn't break. Tests pass. Ship it.
 
@@ -201,7 +254,7 @@ You also get:
 
 ---
 
-## 6. What Actually Protects Your Backend
+## What Actually Protects Your Backend
 
 So if CORS isn't protecting your backend — what does?
 
@@ -263,7 +316,7 @@ Regardless of your auth setup, these two should always be in place. Rate limitin
 
 ---
 
-## 7. Key Takeaways
+## Key Takeaways
 
 If there is one thing you take away from this:
 

@@ -140,43 +140,55 @@ function capitalize(s: string) {
       </div>
     </header>
 
-    <!-- Hero gradient banner -->
-    <div class={`bg-gradient-to-br ${gradient(post.data.tags)} relative overflow-hidden mb-14`} style="height: 340px;">
-      <svg class="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="grid-post" width="48" height="48" patternUnits="userSpaceOnUse">
-            <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" stroke-width="1"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid-post)" />
-      </svg>
-      <!-- Subtle radial glow -->
-      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
-      <svg
-        class="absolute inset-0 m-auto w-52 h-52 text-white/[0.12]"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="0.5"
-        set:html={icon(post.data.tags)}
-      />
-    </div>
+    <!-- Hero banner: actual image or gradient fallback -->
+    {post.data.thumbnail ? (
+      <div class="max-w-3xl mx-auto px-6 mb-14">
+        <div class="rounded-2xl overflow-hidden" style="height: 340px;">
+          <img
+            src={post.data.thumbnail}
+            alt={post.data.title}
+            class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    ) : (
+      <div class={`bg-gradient-to-br ${gradient(post.data.tags)} relative overflow-hidden mb-14`} style="height: 340px;">
+        <svg class="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid-post" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid-post)" />
+        </svg>
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
+        <svg
+          class="absolute inset-0 m-auto w-52 h-52 text-white/[0.12]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="0.5"
+          set:html={icon(post.data.tags)}
+        />
+      </div>
+    )}
 
     <!-- Article body -->
     <article class="max-w-3xl mx-auto px-6">
       <div
         class="prose prose-invert prose-lg max-w-none
                prose-headings:font-bold prose-headings:text-white
-               prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4
-               prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-               prose-p:text-slate-300 prose-p:leading-relaxed
+               prose-h2:text-2xl prose-h2:mt-16 prose-h2:mb-5 prose-h2:pb-3 prose-h2:border-b prose-h2:border-white/[0.08]
+               prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-3 prose-h3:text-slate-200
+               prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-5
                prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
                prose-strong:text-white
                prose-code:text-emerald-300 prose-code:bg-white/[0.06] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
                prose-pre:bg-[#0d0d1a] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
-               prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400
-               prose-li:text-slate-300 prose-li:marker:text-emerald-500
-               prose-hr:border-white/[0.08]"
+               prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400 prose-blockquote:bg-white/[0.02] prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
+               prose-li:text-slate-300 prose-li:marker:text-emerald-500 prose-li:mb-2
+               prose-hr:border-white/[0.08] prose-hr:my-12
+               prose-table:text-slate-300 prose-th:text-slate-200 prose-th:border-white/[0.12] prose-td:border-white/[0.08]"
       >
         <Content />
       </div>
