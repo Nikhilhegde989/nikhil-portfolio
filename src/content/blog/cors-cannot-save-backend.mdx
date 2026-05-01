@@ -1,5 +1,5 @@
 ---
-title: "Why CORS Cannot Save Your Backend"
+title: "CORS Cannot Save Your Backend"
 summary: "Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."
 publishedAt: 2025-04-28
 tags: ["security", "cors", "web", "backend"]
@@ -56,7 +56,7 @@ So CORS was never designed to keep people out. It was designed to let certain cr
 
 ### What Actually Happens When You Make a Cross-Origin Request
 
-1. Your frontend calls `fetch("http://localhost:3000/api/data")`
+1. Your frontend calls `fetch("https://api.myapp.com/v1/data")`
 2. The browser automatically attaches an `Origin` header and sends the request to your backend
 3. Your backend receives it, processes it, and runs your logic. The CORS middleware checks if the incoming origin matches your whitelist. If it does, it attaches `Access-Control-Allow-Origin` to the response. If it doesn't, that header is simply omitted.
 4. The browser reads the response. If `Access-Control-Allow-Origin` is present and matches, your JavaScript gets the response. If the header is missing or doesn't match, the browser blocks your JavaScript from reading it and throws a CORS error.
@@ -67,7 +67,7 @@ Notice what is never in this sequence: **your backend blocking anything**. It re
 
 ### Why This Actually Matters
 
-Imagine a poorly built money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your `/transfer` endpoint.
+Imagine if you build a money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your `/transfer` endpoint.
 
 Here is what actually happens:
 
@@ -180,7 +180,7 @@ The moment you cross **any one** of these lines:
 - `Content-Type` is `application/json`
 - Any custom header is present : `Authorization`, `X-API-Key`, anything
 
-In practice, almost every real API call carries either `application/json` or an `Authorization` header. Which means **almost every real-world API call triggers a preflight**, whether developers are aware of it or not.
+In practice, almost every real API call carries either `application/json` or an `Authorization` header. Which means **almost every real-world API call triggers a preflight**.
 
 ### Does Preflight Actually Protect You?
 
@@ -224,7 +224,7 @@ Origin is whitelisted, server approves the OPTIONS request, browser fires the ac
 
 **curl, Postman, any non-browser client.** Preflight is a browser behavior. Any non-browser client skips it entirely. You can fire any method, any header, claim any origin, and your backend responds freely.
 
-**If your server blindly approves all preflight requests.** Some developers do this to quickly fix CORS errors in development:
+**If your server blindly approves all preflight requests.** Some of us do this to quickly fix CORS errors:
 
 ```javascript
 app.use((req, res, next) => {

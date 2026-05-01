@@ -78,7 +78,7 @@ function icon(tags: string[]) {
 
 <BlogLayout
   title="Writing"
-  description="Technical deep-dives into backend systems, PostgreSQL internals, distributed architecture, and lessons from real production traffic."
+  description="Things I've figured out, things I've broken, and things I wish someone had written down sooner."
   currentPath="/blog"
 >
   <main class="pt-24 pb-32">
@@ -92,20 +92,21 @@ function icon(tags: string[]) {
         Engineering<br /><span class="text-slate-500">Insights.</span>
       </h1>
       <p class="text-slate-400 text-lg max-w-lg leading-relaxed mx-auto">
-        Deep dives into backend systems, PostgreSQL internals, distributed architecture,
-        and lessons from real production traffic.
+        Things I've figured out, things I've broken, and things I wish someone had written down sooner.
       </p>
     </section>
 
-    <!-- Tag filter -->
-    <section class="max-w-6xl mx-auto px-6 mb-14">
-      <div class="flex gap-2.5 flex-wrap">
-        <button class="tag-btn" data-tag="all" data-active="true">All Posts</button>
-        {allTags.map((tag) => (
-          <button class="tag-btn" data-tag={tag}>{capitalize(tag)}</button>
-        ))}
-      </div>
-    </section>
+    <!-- Tag filter — only shown when there are multiple posts -->
+    {allPosts.length > 1 && (
+      <section class="max-w-6xl mx-auto px-6 mb-14">
+        <div class="flex gap-2.5 flex-wrap">
+          <button class="tag-btn" data-tag="all" data-active="true">All Posts</button>
+          {allTags.map((tag) => (
+            <button class="tag-btn" data-tag={tag}>{capitalize(tag)}</button>
+          ))}
+        </div>
+      </section>
+    )}
 
     <!-- Posts grid — featured spans full width, others fill 2/3-col grid -->
     <section class="max-w-6xl mx-auto px-6">
