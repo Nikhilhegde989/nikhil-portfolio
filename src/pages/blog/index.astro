@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
+import readingTime from 'reading-time';
 
 const allPosts = await getCollection('blog');
 const sorted = allPosts.sort(
@@ -168,7 +169,7 @@ function icon(tags: string[]) {
               <p class="text-slate-400 text-base leading-relaxed mb-7">{featured.data.summary}</p>
               <div class="flex items-center justify-between">
                 <span class="text-slate-600 text-sm">
-                  {fmtDate(featured.data.publishedAt)} · {featured.data.readingTime} min read
+                  {fmtDate(featured.data.publishedAt)} · {Math.ceil(readingTime(featured.body).minutes)} min read
                 </span>
                 <span class="text-emerald-400 text-sm font-medium flex items-center gap-1.5 group-hover:gap-3 transition-all">
                   Read Post
@@ -236,7 +237,7 @@ function icon(tags: string[]) {
               <p class="text-slate-500 text-sm leading-relaxed mb-5 line-clamp-3">{post.data.summary}</p>
               <div class="flex items-center justify-between border-t border-white/[0.06] pt-4 mt-auto">
                 <span class="text-slate-600 text-xs">
-                  {fmtDate(post.data.publishedAt)} · {post.data.readingTime} min read
+                  {fmtDate(post.data.publishedAt)} · {Math.ceil(readingTime(post.body).minutes)} min read
                 </span>
                 <span class="text-emerald-400 text-xs font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
                   Read →

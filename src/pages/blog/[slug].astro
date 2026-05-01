@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BlogLayout from '../../layouts/BlogLayout.astro';
+import readingTime from 'reading-time';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -12,6 +13,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+const postReadingTime = Math.ceil(readingTime(post.body).minutes);
 
 const allPosts = await getCollection('blog');
 const sorted = allPosts.sort(
@@ -134,7 +136,7 @@ function capitalize(s: string) {
         <div>
           <p class="text-white text-sm font-medium">Nikhil Hegde</p>
           <p class="text-slate-500 text-xs">
-            {fmtDate(post.data.publishedAt)} &middot; {post.data.readingTime} min read
+            {fmtDate(post.data.publishedAt)} &middot; {postReadingTime} min read
           </p>
         </div>
       </div>
