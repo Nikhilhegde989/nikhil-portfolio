@@ -12,7 +12,8 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const postReadingTime = Math.ceil(readingTime(post.body).minutes);
 
 const allPosts = await getCollection('blog');
@@ -97,150 +98,184 @@ function capitalize(s: string) {
   <div id="progress-bar" class="fixed top-16 left-0 h-[2px] bg-emerald-400 z-40 w-0 transition-none"></div>
 
   <main class="pt-20 pb-32">
-    <!-- Back link -->
-    <div class="max-w-3xl mx-auto px-6 pt-10 mb-10">
-      <a
-        href="/blog"
-        class="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-400 text-sm transition-colors group"
-      >
-        <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        All Posts
-      </a>
-    </div>
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="lg:grid lg:grid-cols-[1fr_240px] lg:gap-16 lg:items-start">
 
-    <!-- Post header -->
-    <header class="max-w-3xl mx-auto px-6 mb-10">
-      <div class="flex gap-2 flex-wrap mb-5">
-        {post.data.tags.map((t) => (
-          <span class={`text-xs font-medium px-2.5 py-1 rounded-full border ${tagClass(t)}`}>
-            {capitalize(t)}
-          </span>
-        ))}
-      </div>
-
-      <h1
-        class="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-5"
-        style="font-family: 'Fraunces', Georgia, serif;"
-      >
-        {post.data.title}
-      </h1>
-
-      <p class="text-slate-400 text-lg leading-relaxed mb-8">{post.data.summary}</p>
-
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-          NH
-        </div>
+        <!-- Left column: all article content -->
         <div>
-          <p class="text-white text-sm font-medium">Nikhil Hegde</p>
-          <p class="text-slate-500 text-xs">
-            {fmtDate(post.data.publishedAt)} &middot; {postReadingTime} min read
-          </p>
+          <!-- Back link -->
+          <div class="pt-10 mb-10">
+            <a
+              href="/blog"
+              class="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-400 text-sm transition-colors group"
+            >
+              <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              All Posts
+            </a>
+          </div>
+
+          <!-- Post header -->
+          <header class="mb-10">
+            <div class="flex gap-2 flex-wrap mb-5">
+              {post.data.tags.map((t) => (
+                <span class={`text-xs font-medium px-2.5 py-1 rounded-full border ${tagClass(t)}`}>
+                  {capitalize(t)}
+                </span>
+              ))}
+            </div>
+
+            <h1
+              class="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-5"
+              style="font-family: 'Fraunces', Georgia, serif;"
+            >
+              {post.data.title}
+            </h1>
+
+            <p class="text-slate-400 text-lg leading-relaxed mb-8">{post.data.summary}</p>
+
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                NH
+              </div>
+              <div>
+                <p class="text-white text-sm font-medium">Nikhil Hegde</p>
+                <p class="text-slate-500 text-xs">
+                  {fmtDate(post.data.publishedAt)} &middot; {postReadingTime} min read
+                </p>
+              </div>
+            </div>
+          </header>
+
+          <!-- Hero banner: actual image or gradient fallback -->
+          {post.data.thumbnail ? (
+            <div class="mb-14">
+              <div class="rounded-2xl overflow-hidden" style="height: 340px;">
+                <img
+                  src={post.data.thumbnail}
+                  alt={post.data.title}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          ) : (
+            <div class={`bg-gradient-to-br ${gradient(post.data.tags)} relative overflow-hidden mb-14 rounded-2xl`} style="height: 340px;">
+              <svg class="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="grid-post" width="48" height="48" patternUnits="userSpaceOnUse">
+                    <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid-post)" />
+              </svg>
+              <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
+              <svg
+                class="absolute inset-0 m-auto w-52 h-52 text-white/[0.12]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="0.5"
+                set:html={icon(post.data.tags)}
+              />
+            </div>
+          )}
+
+          <!-- Article body -->
+          <article>
+            <div
+              class="prose prose-invert prose-lg max-w-none
+                     prose-headings:font-bold prose-headings:text-white
+                     prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:pb-4 prose-h2:border-b prose-h2:border-white/20
+                     prose-h3:text-xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:text-white prose-h3:pl-4 prose-h3:border-l-2 prose-h3:border-emerald-500
+                     prose-h4:text-base prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-slate-200 prose-h4:font-semibold prose-h4:uppercase prose-h4:tracking-widest prose-h4:text-xs
+                     prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-5
+                     prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
+                     prose-strong:text-white
+                     prose-code:text-emerald-300 prose-code:bg-white/[0.06] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+                     prose-pre:bg-[#0d0d1a] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
+                     prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400 prose-blockquote:bg-white/[0.02] prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
+                     prose-li:text-slate-300 prose-li:marker:text-emerald-500 prose-li:mb-2
+                     prose-hr:border-white/[0.08] prose-hr:my-12
+                     prose-table:text-slate-300 prose-th:text-slate-200 prose-th:border-white/[0.12] prose-td:border-white/[0.08]"
+            >
+              <Content />
+            </div>
+          </article>
+
+          <!-- Tags footer -->
+          <div class="mt-14 pt-8 border-t border-white/[0.06]">
+            <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">Tagged in</p>
+            <div class="flex gap-2 flex-wrap">
+              {post.data.tags.map((t) => (
+                <a
+                  href={`/blog`}
+                  class={`text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 ${tagClass(t)}`}
+                >
+                  {capitalize(t)}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- Prev / Next -->
+          {(prevPost || nextPost) && (
+            <div class="mt-14">
+              <div class="grid grid-cols-2 gap-4">
+                {prevPost ? (
+                  <a
+                    href={`/blog/${prevPost.slug}`}
+                    class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all"
+                  >
+                    <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">← Older</p>
+                    <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
+                      {prevPost.data.title}
+                    </p>
+                  </a>
+                ) : <div />}
+
+                {nextPost ? (
+                  <a
+                    href={`/blog/${nextPost.slug}`}
+                    class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all text-right"
+                  >
+                    <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">Newer →</p>
+                    <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
+                      {nextPost.data.title}
+                    </p>
+                  </a>
+                ) : <div />}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-    </header>
 
-    <!-- Hero banner: actual image or gradient fallback -->
-    {post.data.thumbnail ? (
-      <div class="max-w-3xl mx-auto px-6 mb-14">
-        <div class="rounded-2xl overflow-hidden" style="height: 340px;">
-          <img
-            src={post.data.thumbnail}
-            alt={post.data.title}
-            class="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-    ) : (
-      <div class={`bg-gradient-to-br ${gradient(post.data.tags)} relative overflow-hidden mb-14`} style="height: 340px;">
-        <svg class="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid-post" width="48" height="48" patternUnits="userSpaceOnUse">
-              <path d="M 48 0 L 0 0 0 48" fill="none" stroke="white" stroke-width="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid-post)" />
-        </svg>
-        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)]"></div>
-        <svg
-          class="absolute inset-0 m-auto w-52 h-52 text-white/[0.12]"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="0.5"
-          set:html={icon(post.data.tags)}
-        />
-      </div>
-    )}
+        <!-- Right column: sticky ToC -->
+        {tocHeadings.length > 0 && (
+          <aside class="hidden lg:block">
+            <div class="sticky top-28 pt-10">
+              <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">In this blog</p>
+              <nav class="space-y-0.5">
+                {tocHeadings.map((h) => (
+                  <a
+                    href={`#${h.slug}`}
+                    data-toc={h.slug}
+                    class={`toc-link block py-1.5 text-sm leading-snug transition-colors ${
+                      h.depth === 2
+                        ? 'text-slate-400 hover:text-white font-medium'
+                        : 'text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs'
+                    }`}
+                  >
+                    {h.text}
+                  </a>
+                ))}
+              </nav>
+            </div>
+          </aside>
+        )}
 
-    <!-- Article body -->
-    <article class="max-w-3xl mx-auto px-6">
-      <div
-        class="prose prose-invert prose-lg max-w-none
-               prose-headings:font-bold prose-headings:text-white
-               prose-h2:text-2xl prose-h2:mt-16 prose-h2:mb-5 prose-h2:pb-3 prose-h2:border-b prose-h2:border-white/[0.08]
-               prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-3 prose-h3:text-slate-200
-               prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-5
-               prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
-               prose-strong:text-white
-               prose-code:text-emerald-300 prose-code:bg-white/[0.06] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
-               prose-pre:bg-[#0d0d1a] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
-               prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400 prose-blockquote:bg-white/[0.02] prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
-               prose-li:text-slate-300 prose-li:marker:text-emerald-500 prose-li:mb-2
-               prose-hr:border-white/[0.08] prose-hr:my-12
-               prose-table:text-slate-300 prose-th:text-slate-200 prose-th:border-white/[0.12] prose-td:border-white/[0.08]"
-      >
-        <Content />
-      </div>
-    </article>
-
-    <!-- Tags footer -->
-    <div class="max-w-3xl mx-auto px-6 mt-14 pt-8 border-t border-white/[0.06]">
-      <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">Tagged in</p>
-      <div class="flex gap-2 flex-wrap">
-        {post.data.tags.map((t) => (
-          <a
-            href={`/blog`}
-            class={`text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 ${tagClass(t)}`}
-          >
-            {capitalize(t)}
-          </a>
-        ))}
       </div>
     </div>
-
-    <!-- Prev / Next -->
-    {(prevPost || nextPost) && (
-      <div class="max-w-3xl mx-auto px-6 mt-14">
-        <div class="grid grid-cols-2 gap-4">
-          {prevPost ? (
-            <a
-              href={`/blog/${prevPost.slug}`}
-              class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all"
-            >
-              <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">← Older</p>
-              <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
-                {prevPost.data.title}
-              </p>
-            </a>
-          ) : <div />}
-
-          {nextPost ? (
-            <a
-              href={`/blog/${nextPost.slug}`}
-              class="group p-5 rounded-xl border border-white/[0.08] hover:border-white/20 transition-all text-right"
-            >
-              <p class="text-slate-600 text-xs uppercase tracking-widest mb-2 font-mono">Newer →</p>
-              <p class="text-slate-300 text-sm font-medium group-hover:text-white transition-colors line-clamp-2">
-                {nextPost.data.title}
-              </p>
-            </a>
-          ) : <div />}
-        </div>
-      </div>
-    )}
   </main>
 </BlogLayout>
 
@@ -252,5 +287,33 @@ function capitalize(s: string) {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       bar.style.width = total > 0 ? `${Math.min((scrolled / total) * 100, 100)}%` : '0%';
     }, { passive: true });
+  }
+
+  // Scroll-spy: highlight active ToC link
+  const tocLinks = document.querySelectorAll<HTMLAnchorElement>('[data-toc]');
+  if (tocLinks.length > 0) {
+    const headingEls = document.querySelectorAll<HTMLElement>('h2[id], h3[id]');
+
+    function setActive(id: string) {
+      tocLinks.forEach((l) => {
+        const isActive = l.dataset.toc === id;
+        l.classList.toggle('!text-emerald-400', isActive);
+        l.classList.toggle('text-slate-400', !isActive && !l.classList.contains('text-slate-600') && l.dataset.toc !== id);
+      });
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: '-15% 0% -70% 0%' }
+    );
+
+    headingEls.forEach((el) => observer.observe(el));
   }
 </script>

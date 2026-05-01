@@ -4,9 +4,9 @@ summary: "Your backend processes every request. Even the ones CORS blocks. I fou
 publishedAt: 2025-04-28
 tags: ["security", "cors", "web", "backend"]
 featured: false
-thumbnail: "/blog/cors-thumbnail.png"
+thumbnail: "/blog/firefly.png"
 ---
-
+> The demos in this post come from an interactive tool I built. If you'd rather experiment with the scenarios yourself, <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">the full code is here</a>.
 
 ## The Common Misconception About CORS
 
@@ -120,7 +120,7 @@ You can **fabricate the Origin header** with a single curl command. You can stra
 Try this:
 
 ```bash
-curl -H "Origin: https://google.com" http://localhost:3000/api/data
+curl -H "Origin: https://google.com" https://api.myapp.com/v1/data
 ```
 
 That request just told your server *"hey, I'm Google"*  and your server believed it. Full response. No block. No error.
@@ -139,7 +139,7 @@ curl fabricates the `Origin` header, the backend does a string comparison and re
 
 ---
 
-## Preflight Requests — The Browser's Safety Check
+## Preflight Requests : The Browser's Safety Check
 
 At this point you might be thinking: *"Wait, we have preflight requests. The browser sends an OPTIONS request first, checks whether the origin is allowed, and if not, blocks the actual request before it reaches the backend. That saves us, doesn't it?"*
 
@@ -162,7 +162,7 @@ If the server responds with the right headers, the browser fires the actual requ
 
 This is fundamentally different from the CORS block we saw earlier. In that case, the backend received and processed the request. With a failed preflight, the backend receives nothing.
 
-### When Preflight Does NOT Trigger — Simple Requests
+### When Preflight Does NOT Trigger : Simple Requests
 
 These are called **simple requests**. The browser sends them directly without preflighting. A request is simple only when it meets **all** of the following conditions simultaneously:
 
@@ -241,7 +241,7 @@ Preflight fires, server approves everything, browser allows the actual request. 
 
 ---
 
-## HTTP Methods — Why This Is Not Just a Convention
+## HTTP Methods : Why This Is Not Just a Convention
 
 Most developers treat HTTP methods as a convention. GET, POST, PUT, DELETE, REST says use them correctly, but at the end of the day you can fetch data with a POST or delete something with a GET and it works fine. The application doesn't break. Tests pass. Ship it.
 
@@ -395,3 +395,7 @@ The rule: Without identity, you have no trust anchor. Every defense is probabili
 
 
 One sentence to remember: CORS decides whether a browser lets JavaScript read a response. Your backend decides whether to honor the request. Those are different jobs. Do not confuse them.
+
+---
+
+If you'd like to explore these scenarios hands-on, feel free to <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">check out the demo on your own</a>.
