@@ -58,6 +58,14 @@ const isPost = currentPath.startsWith('/blog/') && currentPath !== '/blog/';
       gtag('js', new Date());
       gtag('config', 'G-CYL1PSW02D');
     </script>
+
+    <script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "wko5ucfsks");
+    </script>
   </head>
 
   <body class="bg-[#07070f] text-white min-h-screen antialiased">
@@ -123,6 +131,52 @@ const isPost = currentPath.startsWith('/blog/') && currentPath !== '/blog/';
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       }
+    </script>
+
+    <script is:inline>
+      // Scroll depth + reading time tracking for blog posts
+      (function () {
+        if (!window.location.pathname.startsWith('/blog/') || window.location.pathname === '/blog/') return;
+
+        var depthFired = {};
+        var depthMilestones = [25, 50, 75, 90, 100];
+
+        function getScrollDepth() {
+          var scrollTop = window.scrollY || document.documentElement.scrollTop;
+          var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          return docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        }
+
+        window.addEventListener('scroll', function () {
+          var depth = getScrollDepth();
+          for (var i = 0; i < depthMilestones.length; i++) {
+            var m = depthMilestones[i];
+            if (depth >= m && !depthFired[m]) {
+              depthFired[m] = true;
+              if (typeof gtag === 'function') {
+                gtag('event', 'scroll_depth', { percent_scrolled: m, page_path: window.location.pathname });
+              }
+            }
+          }
+        }, { passive: true });
+
+        var timeMilestones = [30, 60, 180, 300];
+        var timeFired = {};
+        var startTime = Date.now();
+
+        setInterval(function () {
+          var elapsed = Math.round((Date.now() - startTime) / 1000);
+          for (var i = 0; i < timeMilestones.length; i++) {
+            var t = timeMilestones[i];
+            if (elapsed >= t && !timeFired[t]) {
+              timeFired[t] = true;
+              if (typeof gtag === 'function') {
+                gtag('event', 'reading_time', { seconds: t, page_path: window.location.pathname });
+              }
+            }
+          }
+        }, 5000);
+      })();
     </script>
   </body>
 </html>
