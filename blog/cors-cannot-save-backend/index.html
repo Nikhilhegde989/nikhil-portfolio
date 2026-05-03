@@ -1,0 +1,465 @@
+<!DOCTYPE html><html lang="en" class="scroll-pt-24"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CORS Cannot Save Your Backend — Nikhil Hegde</title><meta name="description" content="Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."><meta property="og:title" content="CORS Cannot Save Your Backend — Nikhil Hegde"><meta property="og:description" content="Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."><meta property="og:type" content="article"><meta property="og:site_name" content="Nikhil Hegde"><meta property="article:published_time" content="2025-05-03T00:00:00.000Z"><meta property="article:author" content="Nikhil Hegde"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="CORS Cannot Save Your Backend — Nikhil Hegde"><meta name="twitter:description" content="Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."><link rel="canonical" href="https://nikhilhegde.com/blog/cors-cannot-save-backend"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><script async src="https://www.googletagmanager.com/gtag/js?id=G-CYL1PSW02D"></script><script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-CYL1PSW02D');
+    </script><script type="text/javascript">
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "wko5ucfsks");
+    </script><link rel="stylesheet" href="/_astro/_slug_.CJ5i339m.css"></head> <body class="bg-[#07070f] text-white min-h-screen antialiased"> <nav class="fixed top-0 left-0 right-0 bg-[#07070f]/90 backdrop-blur-md border-b border-white/[0.06] z-50"> <div class="max-w-6xl mx-auto px-6 lg:px-8"> <div class="flex items-center justify-between h-16"> <a href="/" class="text-xl font-bold text-white tracking-tight hover:text-emerald-400 transition-colors">
+NH<span class="text-emerald-500">.</span> </a> <div class="flex items-center gap-7"> <a href="/" class="text-slate-400 hover:text-white text-sm font-medium transition-colors">
+Portfolio
+</a> <a href="/blog" class="text-sm font-medium transition-colors text-slate-400 hover:text-white">
+Writing
+</a> <a href="#" id="back-to-top" class="text-slate-500 hover:text-white text-sm transition-colors hidden md:block">
+↑ Top
+</a> </div> </div> </div> </nav>   <div id="progress-bar" class="fixed top-16 left-0 h-[2px] bg-emerald-400 z-40 w-0 transition-none"></div> <main class="pt-20 pb-32"> <div class="max-w-6xl mx-auto px-6"> <div class="lg:grid lg:grid-cols-[1fr_240px] lg:gap-16 lg:items-start"> <!-- Left column: all article content --> <div> <!-- Back link --> <div class="pt-10 mb-10"> <a href="/blog" class="inline-flex items-center gap-2 text-slate-500 hover:text-emerald-400 text-sm transition-colors group"> <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"> <path d="M19 12H5M12 19l-7-7 7-7"></path> </svg>
+All Posts
+</a> </div> <!-- Post header --> <header class="mb-10"> <div class="flex gap-2 flex-wrap mb-5"> <span class="text-xs font-medium px-2.5 py-1 rounded-full border bg-rose-950/60 text-rose-300 border-rose-800/50"> Security </span><span class="text-xs font-medium px-2.5 py-1 rounded-full border bg-orange-950/60 text-orange-300 border-orange-800/50"> Cors </span><span class="text-xs font-medium px-2.5 py-1 rounded-full border bg-sky-950/60 text-sky-300 border-sky-800/50"> Web </span><span class="text-xs font-medium px-2.5 py-1 rounded-full border bg-slate-900/60 text-slate-300 border-slate-700/50"> Backend </span> </div> <h1 class="text-4xl md:text-5xl font-bold text-white leading-[1.1] mb-5" style="font-family: 'Fraunces', Georgia, serif;"> CORS Cannot Save Your Backend </h1> <p class="text-slate-400 text-lg leading-relaxed mb-8">Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill.</p> <div class="flex items-center gap-3"> <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+NH
+</div> <div> <p class="text-white text-sm font-medium">Nikhil Hegde</p> <p class="text-slate-500 text-xs"> May 3, 2025 &middot; 20 min read
+</p> </div> </div> </header> <!-- Hero banner: actual image or gradient fallback --> <div class="mb-14"> <div class="rounded-2xl overflow-hidden h-48 sm:h-64 md:h-[340px]"> <img src="/blog/firefly.png" alt="CORS Cannot Save Your Backend" class="w-full h-full object-cover"> </div> </div> <!-- Article body --> <article> <div class="prose prose-invert prose-lg max-w-none
+                     prose-headings:font-bold prose-headings:text-white
+                     prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:pb-4 prose-h2:border-b prose-h2:border-white/20
+                     prose-h3:text-xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:text-white prose-h3:pl-4 prose-h3:border-l-2 prose-h3:border-emerald-500
+                     prose-h4:text-base prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-slate-200 prose-h4:font-semibold prose-h4:uppercase prose-h4:tracking-widest prose-h4:text-xs
+                     prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-5
+                     prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline
+                     prose-strong:text-white
+                     prose-code:text-emerald-300 prose-code:bg-white/[0.06] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+                     prose-pre:bg-[#0d0d1a] prose-pre:border prose-pre:border-white/[0.08] prose-pre:rounded-xl
+                     prose-blockquote:border-l-emerald-500 prose-blockquote:text-slate-400 prose-blockquote:bg-white/[0.02] prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:rounded-r-lg
+                     prose-li:text-slate-300 prose-li:marker:text-emerald-500 prose-li:mb-2
+                     prose-hr:border-white/[0.08] prose-hr:my-12
+                     prose-table:text-slate-300 prose-th:text-slate-200 prose-th:border-white/[0.12] prose-td:border-white/[0.08]"> <blockquote>
+<p>The demos in this post come from an interactive tool I built. If you’d rather experiment with the scenarios yourself, <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">the full code is here</a>.</p>
+</blockquote>
+<h2 id="the-common-misconception-about-cors">The Common Misconception About CORS</h2>
+<p>I was building an AI application, a public-facing API meant to serve only the users who visit my website. No login, no authentication, just open access for anyone landing on my frontend.</p>
+<p>But I wanted that API to be accessed <strong>only through my website</strong>, not by anyone else, in any way, from anywhere else. No scrapers or automated scripts hammering my endpoints, no unauthorized applications consuming my resources without any control or visibility on my end.</p>
+<p>Since there was no auth involved, I thought: <em>“Fine, I’ll add CORS and whitelist only my frontend’s origin. Simple enough. If the request is coming from my website, process it. If it’s coming from anywhere else, my backend rejects it before doing anything.”</em></p>
+<p>Sounded solid, right?</p>
+<p>Then I opened my terminal and typed:</p>
+<pre class="astro-code github-dark-dimmed" style="background-color:#22272e;color:#adbac7;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#96D0FF"> http://localhost:3000/api/data</span></span></code></pre>
+<p>The response came back instantly. Full data. No errors. No rejection.</p>
+<p>So, I did some digging. Turns out curl doesn’t send an <code>Origin</code> header by default. So I thought, fine, I’ll go one step further. I added a middleware that explicitly blocks any request without an <code>Origin</code> header. No origin, no response. Problem solved.</p>
+<p>Then I decided to verify properly. I whitelisted my frontend on port <code>5173</code>. Then I spun up a completely different frontend on a different port and made a request from there.</p>
+<p>My browser threw a CORS error. Blocked. I actually felt good for a second.</p>
+<p>Until I checked my backend logs.</p>
+<p>The request was there. My backend had received it, processed it, executed the logic, and sent a response back. The browser had blocked my frontend JavaScript from <em>reading</em> that response, but my backend had already done all the work.</p>
+<p>That’s when it clicked. <strong>CORS was never blocking the request. It was never meant to.</strong> CORS is not a gate at your backend door. It’s a filter in the user’s browser. And anything that isn’t a browser simply doesn’t care that it exists.</p>
+<hr/>
+<h2 id="what-cors-actually-is-and-how-it-really-works">What CORS Actually Is and How It Really Works</h2>
+<p>CORS stands for <strong>Cross-Origin Resource Sharing</strong>, and the most important thing to understand about it is that it is a <strong>browser feature</strong>. Not a server feature. Not a security layer for your backend.</p>
+<p>To understand why it exists, we need to understand what it was actually built to solve.</p>
+<h3 id="the-same-origin-policy">The Same-Origin Policy</h3>
+<p>Browsers have a built-in rule called the <strong>Same-Origin Policy</strong>. It says JavaScript running on <code>website-a.com</code> should not be able to read responses from <code>website-b.com</code>. Without it, any random website you visit could silently make requests to your bank or email using your active session cookies and read the responses.</p>
+<p>CORS is the mechanism that lets servers <strong>selectively relax</strong> that restriction for trusted origins.</p>
+<p>So CORS was never designed to keep people out. It was designed to let certain cross-origin requests through in a controlled way. The complete opposite of what I was trying to use it for.</p>
+<h3 id="what-actually-happens-when-you-make-a-cross-origin-request">What Actually Happens When You Make a Cross-Origin Request</h3>
+<ol>
+<li>Your frontend calls <code>fetch(&quot;https://api.myapp.com/v1/data&quot;)</code></li>
+<li>The browser automatically attaches an <code>Origin</code> header and sends the request to your backend</li>
+<li>Your backend receives it, processes it, and runs your logic. The CORS middleware checks if the incoming origin matches your whitelist. If it does, it attaches <code>Access-Control-Allow-Origin</code> to the response. If it doesn’t, that header is simply omitted.</li>
+<li>The browser reads the response. If <code>Access-Control-Allow-Origin</code> is present and matches, your JavaScript gets the response. If the header is missing or doesn’t match, the browser blocks your JavaScript from reading it and throws a CORS error.</li>
+</ol>
+<p>Notice what is never in this sequence: <strong>your backend blocking anything</strong>. It receives the request, processes it, and responds. Every time. The entire CORS decision happens in the browser, after your backend has already done its job.</p>
+<blockquote>
+<p><strong>CORS errors happen in the browser, after the server has already processed the request.</strong></p>
+</blockquote>
+<h3 id="why-this-actually-matters">Why This Actually Matters</h3>
+<p>Imagine if you built a money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your <code>/transfer</code> endpoint.</p>
+<p>Here is what actually happens:</p>
+<ul>
+<li>Frontend from a non-allowed origin calls <code>/transfer</code></li>
+<li>Request reaches your backend</li>
+<li>Your backend processes it, deducts from one balance, credits another</li>
+<li>Database is updated. Transfer is done.</li>
+<li>Backend sends the success response back to the browser</li>
+<li>Browser sees no <code>Access-Control-Allow-Origin</code> header and blocks the response</li>
+<li>The frontend cannot read the response or show the success message</li>
+</ul>
+<p><strong>But the transfer already happened.</strong></p>
+<p>The user sees an error on screen. The money is already gone from the database. Your CORS configuration did nothing except hide the confirmation.</p>
+<hr/>
+<h2 id="demo">Demo</h2>
+<p>Below are three scenarios. All have a frontend making a request to a backend that has CORS configured. Watch what happens in the browser versus what happens in the backend terminal.</p>
+<p><strong>Scenario A —&gt; Origin blocked in browser</strong></p>
+<style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><astro-island uid="Z26Q8w2" prefix="r7" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/A-origin-blocked.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/A-origin-blocked.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>The browser throws a CORS error but check the backend logs. The request arrived, was processed, and a response was sent. The browser just blocked your JavaScript from reading it.</p>
+<p><strong>Scenario B —&gt; Origin allowed</strong></p>
+<astro-island uid="Z2mC4sM" prefix="r8" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/B-origin-allowed.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/B-origin-allowed.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>When the origin matches the whitelist, the browser receives the response normally. Same backend logic just a different header in the response.</p>
+<p><strong>Scenario C —&gt; What About Non-Browser Clients?</strong></p>
+<p>The visualization above runs in your browser so CORS is still in the picture. But what happens when you take the browser out of the equation entirely?</p>
+<p>At this point you might be thinking, <em>“okay fine, I’ll just add a middleware on my backend that checks the Origin header and rejects anything that isn’t my allowed domain. Problem solved, right?”</em></p>
+<p>Here’s the biggest catch.</p>
+<blockquote>
+<p>And before you say “I’ll just block all requests that don’t have an Origin header”, that breaks legitimate non-browser clients too. Mobile apps, server-to-server calls, webhooks, CLI tools, none of these send an Origin header by default. Blocking on missing Origin means you’ve just locked out your own integrations along with the attackers.</p>
+</blockquote>
+<p>You can <strong>fabricate the Origin header</strong> with a single curl command. You can straight up claim that your request is coming from anywhere even <code>google.com</code> and the server has absolutely no way to verify whether that is true or not.</p>
+<p>Try this:</p>
+<pre class="astro-code github-dark-dimmed" style="background-color:#22272e;color:#adbac7;overflow-x:auto" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#F69D50">curl</span><span style="color:#6CB6FF"> -H</span><span style="color:#96D0FF"> &quot;Origin: https://google.com&quot;</span><span style="color:#96D0FF"> https://api.myapp.com/v1/data</span></span></code></pre>
+<p>That request just told your server <em>“hey, I’m Google”</em>  and your server believed it. Full response. No block. No error.</p>
+<p>Isn’t that crazy? Your middleware checked the Origin header, saw a domain, and let it through except that Origin header was completely made up. In a browser, the browser itself sets the Origin header and your JavaScript cannot override it. But outside the browser curl, Postman, Python scripts, anything, you set it yourself. You can claim to be anyone.</p>
+<p>So even server-side Origin checking is not a real solution. The Origin header simply cannot be trusted outside a browser context.</p>
+<p>CORS never existed as far as curl is concerned and neither did your middleware.</p>
+<astro-island uid="2fADu0" prefix="r9" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/C-curl-spoofing-bypass.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/C-curl-spoofing-bypass.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>curl fabricates the <code>Origin</code> header, the backend does a string comparison and responds with full data. CORS is entirely irrelevant because it is a browser feature.</p>
+<hr/>
+<h2 id="preflight-requests--the-browsers-safety-check">Preflight Requests : The Browser’s Safety Check</h2>
+<p>At this point you might be thinking: <em>“Wait, we have preflight requests. The browser sends an OPTIONS request first, checks whether the origin is allowed, and if not, blocks the actual request before it reaches the backend. That saves us, doesn’t it?”</em></p>
+<p>Well. That’s not entirely true.</p>
+<p>Preflight does help, but only in one specific scenario. And the number of cases where it does absolutely nothing might surprise you.</p>
+<h3 id="what-is-a-preflight-request">What Is a Preflight Request?</h3>
+<p>Before sending certain HTTP requests, the browser pauses and sends a separate <code>OPTIONS</code> request to your backend first, asking: <em>“Are you okay with me sending this?”</em></p>
+<pre class="astro-code github-dark-dimmed" style="background-color:#22272e;color:#adbac7;overflow-x:auto" tabindex="0" data-language="plaintext"><code><span class="line"><span>OPTIONS /api/data HTTP/1.1</span></span>
+<span class="line"><span>Origin: http://localhost:5173</span></span>
+<span class="line"><span>Access-Control-Request-Method: POST</span></span>
+<span class="line"><span>Access-Control-Request-Headers: Content-Type, Authorization</span></span></code></pre>
+<p>If the server responds with the right headers, the browser fires the actual request. If not, the actual request <strong>never leaves the browser</strong>. The backend never sees it, never processes it.</p>
+<p>This is fundamentally different from the CORS block we saw earlier. In that case, the backend received and processed the request. With a failed preflight, the backend receives nothing.</p>
+<h3 id="when-preflight-does-not-trigger--simple-requests">When Preflight Does NOT Trigger : Simple Requests</h3>
+<p>These are called <strong>simple requests</strong>. The browser sends them directly without preflighting. A request is simple only when it meets <strong>all</strong> of the following conditions simultaneously:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Condition</th><th>Allowed Values</th></tr></thead><tbody><tr><td>Method</td><td><code>GET</code>, <code>POST</code>, or <code>HEAD</code> only</td></tr><tr><td>Content-Type</td><td><code>text/plain</code>, <code>application/x-www-form-urlencoded</code>, <code>multipart/form-data</code> only</td></tr><tr><td>Headers</td><td>No custom headers, only browser-set headers</td></tr></tbody></table>
+<h3 id="when-preflight-triggers">When Preflight Triggers</h3>
+<p>The moment you cross <strong>any one</strong> of these lines:</p>
+<ul>
+<li>Method is <code>PUT</code>, <code>DELETE</code>, or <code>PATCH</code></li>
+<li><code>Content-Type</code> is <code>application/json</code></li>
+<li>Any custom header is present : <code>Authorization</code>, <code>X-API-Key</code>, anything</li>
+</ul>
+<p>In practice, almost every real API call carries either <code>application/json</code> or an <code>Authorization</code> header. Which means <strong>almost every real-world API call triggers a preflight</strong>.</p>
+<h3 id="does-preflight-actually-protect-you">Does Preflight Actually Protect You?</h3>
+<p>Yes, but only in one specific scenario. Preflight protects against <strong>state-changing requests from a malicious cross-origin website in a browser</strong>. The demo below shows all three preflight cases:</p>
+<p><strong>Scenario D —&gt; Simple GET (no preflight)</strong></p>
+<astro-island uid="ZrcToq" prefix="r10" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/D-get-without-preflight.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/D-get-without-preflight.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>A plain GET with no custom headers is a simple request. The browser fires it directly with no OPTIONS check. The backend receives it regardless of origin.</p>
+<p><strong>Scenario E —&gt; POST with <code>application/json</code> triggers preflight, gets blocked</strong></p>
+<astro-island uid="24NcQL" prefix="r11" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/E-post-preflight-block.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/E-post-preflight-block.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>The <code>application/json</code> content type pushes this out of the simple-request category. Preflight fires and when the origin is not allowed, the OPTIONS response carries no approval. The actual POST never reaches the backend.</p>
+<p><strong>Scenario F —&gt; GET with <code>Authorization</code> header triggers preflight, gets blocked</strong></p>
+<astro-island uid="Z1uK8wR" prefix="r12" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/F-get+auth-preflight-block.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/F-get+auth-preflight-block.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>Adding a custom header to a GET is enough to trigger preflight. Even a read request can be blocked before the backend ever sees it as long as auth headers are present and the origin is not whitelisted.</p>
+<p><strong>Scenario G —&gt; Preflight succeeds, request goes through</strong></p>
+<astro-island uid="1BxOrm" prefix="r13" component-url="/_astro/LoopingVideo.D5zwPkGX.js" component-export="LoopingVideo" renderer-url="/_astro/client.DCKK-Ipe.js" props="{&quot;src&quot;:[0,&quot;/videos/G-preflight-success.mp4&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;LoopingVideo&quot;,&quot;value&quot;:true}" await-children><div style="position:relative;width:100%;border-radius:8px;margin:1rem 0;overflow:hidden;cursor:pointer"><video muted="" playsInline="" style="width:100%;display:block;border-radius:8px"><source src="/videos/G-preflight-success.mp4" type="video/mp4"/></video><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35)"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"></polygon></svg></div></div><style>
+        @keyframes loopFlash {
+          0%   { opacity: 0.55; }
+          100% { opacity: 0; }
+        }
+      </style></div><!--astro:end--></astro-island>
+<p>Origin is whitelisted, server approves the OPTIONS request, browser fires the actual request. The full round-trip works as expected.</p>
+<h3 id="where-preflight-completely-fails">Where Preflight Completely Fails</h3>
+<p><strong>Simple GET requests with no custom headers</strong> hit your backend directly regardless of origin. If that endpoint has any side effects like modifying data, triggering a process, logging sensitive info, preflight will never save you.</p>
+<p><strong>curl, Postman, any non-browser client.</strong> Preflight is a browser behavior. Any non-browser client skips it entirely. You can fire any method, any header, claim any origin, and your backend responds freely.</p>
+<p><strong>If your server blindly approves all preflight requests.</strong> Some of us do this to quickly fix CORS errors:</p>
+<pre class="astro-code github-dark-dimmed" style="background-color:#22272e;color:#adbac7;overflow-x:auto" tabindex="0" data-language="javascript"><code><span class="line"><span style="color:#ADBAC7">app.</span><span style="color:#DCBDFB">use</span><span style="color:#ADBAC7">((</span><span style="color:#F69D50">req</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">res</span><span style="color:#ADBAC7">, </span><span style="color:#F69D50">next</span><span style="color:#ADBAC7">) </span><span style="color:#F47067">=&gt;</span><span style="color:#ADBAC7"> {</span></span>
+<span class="line"><span style="color:#ADBAC7">  res.</span><span style="color:#DCBDFB">header</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">&quot;Access-Control-Allow-Origin&quot;</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">&quot;*&quot;</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  res.</span><span style="color:#DCBDFB">header</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">&quot;Access-Control-Allow-Methods&quot;</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">&quot;GET,PUT,POST,DELETE,PATCH&quot;</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#ADBAC7">  res.</span><span style="color:#DCBDFB">header</span><span style="color:#ADBAC7">(</span><span style="color:#96D0FF">&quot;Access-Control-Allow-Headers&quot;</span><span style="color:#ADBAC7">, </span><span style="color:#96D0FF">&quot;*&quot;</span><span style="color:#ADBAC7">)</span></span>
+<span class="line"><span style="color:#DCBDFB">  next</span><span style="color:#ADBAC7">()</span></span>
+<span class="line"><span style="color:#ADBAC7">})</span></span></code></pre>
+<p>Preflight fires, server approves everything, browser allows the actual request. You’ve defeated the entire mechanism without realising it.</p>
+<p><strong>The one-line summary:</strong> Preflight is real protection, but only against cross-origin state-changing requests, made from a browser, to a server with correct CORS configuration, from a client that isn’t curl.</p>
+<hr/>
+<h2 id="http-methods--why-this-is-not-just-a-convention">HTTP Methods : Why This Is Not Just a Convention</h2>
+<p>Most developers treat HTTP methods as a convention. GET, POST, PUT, DELETE, REST says use them correctly, but at the end of the day you can fetch data with a POST or delete something with a GET and it works fine. The application doesn’t break. Tests pass. Ship it.</p>
+<p>And I think every developer has had this thought: <em>“If I can fetch data using POST, then why not? What’s the actual difference?”</em></p>
+<p>That attitude is understandable but it silently disables protections that were already built for you, and the browser never warns you that it happened.</p>
+<h3 id="why-get-should-only-ever-fetch">Why GET Should Only Ever Fetch</h3>
+<p>GET is designed for one thing: <strong>read-only, side-effect-free operations.</strong></p>
+<p>The reason this matters from a security standpoint: <strong>plain GET requests are never preflighted.</strong></p>
+<p>A plain GET request with no custom headers is always a simple request. It hits your backend directly from any origin, no OPTIONS check, no browser permission needed. That is by design, because GET is supposed to be safe to repeat, safe to cache, safe to fire from anywhere.</p>
+<p>But the moment your GET endpoint causes a side effect, modifies data, triggers a process, deletes a record, you’ve created an endpoint that any cross-origin request can trigger without preflight, without CORS protection, without anything stopping it.</p>
+<p>And it’s not just <code>fetch()</code> you have to worry about. GET requests can be triggered in ways that have nothing to do with JavaScript:</p>
+<ul>
+<li><code>&lt;img src=&quot;https://your-api.com/delete-account&quot;&gt;</code> fires a GET</li>
+<li><code>&lt;a href=&quot;https://your-api.com/delete-account&quot;&gt;</code> fires a GET</li>
+<li>A browser prefetch, a crawler, a monitoring tool, all fire GETs</li>
+</ul>
+<p>None of these send an Authorization header. None of these trigger a preflight. None of these require JavaScript. From any origin, silently, your backend receives and processes the request.</p>
+<h3 id="why-post-should-handle-state-changes">Why POST Should Handle State Changes</h3>
+<p>POST, PUT, PATCH, DELETE signal to the browser that something is changing. And the browser treats them differently.</p>
+<p>A POST request with <code>application/json</code> triggers preflight. A DELETE triggers preflight. A PATCH with an Authorization header triggers preflight.</p>
+<p>By using POST where you should use POST, you automatically get preflight protection as a side effect of doing things correctly.</p>
+<p>You also get:</p>
+<ul>
+<li>Cannot be triggered silently by an <code>&lt;img&gt;</code> tag or <code>&lt;a href&gt;</code> link</li>
+<li>Requires an actual intentional HTTP client to fire</li>
+<li>One thing worth noting: HTML forms with <code>method=&quot;POST&quot;</code> and <code>enctype=&quot;application/x-www-form-urlencoded&quot;</code> are treated as simple requests by the browser. No preflight. A malicious page can auto-submit a hidden form to your API, and the browser will send it directly, complete with the victim’s session cookie. POST is safer than GET, but it is not immune.</li>
+</ul>
+<blockquote>
+<p><em>Using the wrong HTTP method doesn’t just break REST conventions, it silently disables security mechanisms the browser already built for you.</em></p>
+</blockquote>
+<hr/>
+<h2 id="what-actually-protects-your-backend">What Actually Protects Your Backend</h2>
+<p>So if CORS isn’t protecting your backend, what does?</p>
+<p>The answer is: <strong>your backend has to protect itself.</strong> CORS is a browser feature. It was never supposed to be your security layer. Your server needs to make its own trust decisions, independent of whatever the browser does or doesn’t do.</p>
+<h3 id="authentication-and-authorization">Authentication and Authorization</h3>
+<p>This is the real gate. Every request that touches sensitive data or performs a state change should carry a token, JWT, session cookie, OAuth token, whatever your stack uses. Your backend verifies it on every single request, independently, without trusting anything the browser says about where the request came from.</p>
+<p>A valid token proves identity. An <code>Origin</code> header proves nothing.</p>
+<p>One important implementation detail if you are using cookies or <code>Authorization</code> headers for auth across origins: setting <code>Access-Control-Allow-Origin: *</code> will not work. The browser spec explicitly forbids wildcard origins when credentials are involved. You must set <code>Access-Control-Allow-Credentials: true</code> and explicitly mirror the requesting origin in <code>Access-Control-Allow-Origin</code> instead of using a wildcard. Without this, authenticated cross-origin requests will fail even with a perfectly configured CORS setup.</p>
+<p>One more detail worth knowing. If your server dynamically sets <code>Access-Control-Allow-Origin</code> based on the incoming request’s origin rather than using a wildcard, you must also include a <code>Vary: Origin</code> header in your response. Without it, a CDN or reverse proxy might cache a response that includes <code>Access-Control-Allow-Origin: https://yourapp.com</code> and serve that same cached response to a different origin. That origin either gets access it shouldn’t, or gets a CORS error it shouldn’t. Either way it’s a bug and it only appears under caching conditions.</p>
+<h3 id="csrf-tokens">CSRF Tokens</h3>
+<p>Authentication tokens prove identity. But even with authentication in place, there is another attack vector that CORS does nothing about: <strong>Cross-Site Request Forgery (CSRF)</strong>.</p>
+<p>For APIs with session-based auth, CSRF tokens help:</p>
+<ul>
+<li>When a user loads your frontend, the server generates a unique, unpredictable token and embeds it in the page</li>
+<li>For every state-changing request, POST, PUT, DELETE, the frontend must include this token in a header or request body</li>
+<li>A malicious site on evil.com can trigger a request to your backend, but JavaScript running on evil.com cannot read the CSRF token embedded in your page. The Same-Origin Policy blocks cross-origin reads entirely.</li>
+<li>The forged request arrives without the token. Your backend rejects it.</li>
+</ul>
+<p>CORS never entered the picture. The Same-Origin Policy, the thing CORS is built on top of, is what makes CSRF tokens work.</p>
+<h3 id="samesite-cookies">SameSite Cookies</h3>
+<p>Browsers automatically send session cookies with every request to a domain, regardless of which website triggered that request. That’s what makes session-based CSRF attacks dangerous.</p>
+<p>Modern browsers have largely addressed this with the <code>SameSite</code> cookie attribute:</p>
+<ul>
+<li><strong><code>SameSite=Lax</code></strong> the browser default in most modern browsers. Cookies are not sent in cross-site POST, PUT, DELETE, or PATCH requests. Only sent for top-level GET navigations like clicking a link.</li>
+<li><strong><code>SameSite=Strict</code></strong> cookies are never sent in any cross-site request, even GET navigations.</li>
+</ul>
+<p>If you’re using cookie-based session authentication, make sure your cookies explicitly set <code>SameSite=Strict</code> or <code>SameSite=Lax</code>. Do not rely on browser defaults alone.</p>
+<h3 id="what-about-public-apis-with-no-login">What About Public APIs With No Login?</h3>
+<p>This is the genuinely hard case, and honestly, the exact situation I was in.</p>
+<p>If your frontend is public with no authentication, there is no perfect solution.</p>
+<p><strong>API keys don’t solve it either.</strong> If your frontend makes a request with an API key, that key is sitting in your browser’s network tab. Anyone can copy it, paste it into curl, and use it directly, bypassing your frontend entirely.</p>
+<p>Here’s what people actually do:</p>
+<p><strong>Backend as a proxy.</strong> Never call your AI service or any third-party API directly from the frontend. Your frontend calls your own backend, your backend calls the actual service. This doesn’t stop someone from curling your backend directly, but it keeps your real credentials and API keys from ever appearing in the browser network tab, and gives you a single controlled point where you can add rate limiting, logging, and abuse detection.</p>
+<p><strong>Request signing and short-lived tokens.</strong> Instead of embedding a static API key in your frontend, have your backend generate short-lived signed tokens that expire after minutes or hours.</p>
+<p>The idea is straightforward. Your backend has a secret key that never leaves the server. When your frontend needs to make a request, it first asks your backend for a short-lived token. Your backend generates this token by signing a combination of the current timestamp, a unique nonce, and any relevant request details using that secret key, typically with HMAC-SHA256. The frontend then includes this signed token in the actual request. Your backend verifies the signature, checks the timestamp hasn’t expired, and rejects anything that doesn’t match. A scraper can copy a token from the network tab but it expires in minutes. They cannot generate new valid tokens because they don’t have your secret key.</p>
+<p><strong>Rate limiting by IP.</strong> Not perfect, IPs can be shared or rotated, but it stops casual abuse and scraping effectively. It raises the cost of abuse even if it doesn’t eliminate it.</p>
+<p><strong>Bot detection and fingerprinting.</strong> Services like Cloudflare analyze request patterns, timing, and behaviour to distinguish real users from scripts. Not foolproof, but it significantly raises the bar for programmatic abuse.</p>
+<p><strong>Accept that perfect restriction is impossible.</strong> For a truly public, no-auth frontend, you cannot fully prevent a determined person from accessing your API. The goal is not a perfect wall. It’s making abuse difficult, detectable, and costly enough that most people won’t bother.</p>
+<h3 id="rate-limiting-and-input-validation">Rate Limiting and Input Validation</h3>
+<p>Regardless of your auth setup, these two should always be in place. Rate limiting doesn’t care about origins, tokens, or headers. It simply says: <em>you’ve made too many requests in this window, slow down</em>. Input validation ensures you never trust what comes in blindly. Check that the authenticated user actually has permission to access what they’re requesting, not just that they have a valid token.</p>
+<hr/>
+<h2 id="what-to-actually-do">What to Actually Do</h2>
+<p>Stop thinking about CORS as security. It isn’t. Use this instead.</p>
+<h3 id="1-you-have-authentication">1. You Have Authentication</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Layer</th><th>What to Do</th><th>Why</th></tr></thead><tbody><tr><td>Identity</td><td>Verify JWT / session token / API key on every request</td><td>A valid token proves who the caller is. <code>Origin</code> proves nothing.</td></tr><tr><td>CSRF protection</td><td>If using cookie-based sessions, require a CSRF token for every state-changing request</td><td>The attacker cannot read the token from your page. The forged request arrives without it. Reject.</td></tr><tr><td>Cookie hardening</td><td>Set <code>SameSite=Strict</code> or <code>SameSite=Lax</code>. Never <code>SameSite=None</code> without good reason</td><td><code>Lax</code> blocks cookies on cross-site POST/PUT/DELETE. <code>Strict</code> blocks everything, even link clicks.</td></tr><tr><td>CORS</td><td>Configure it correctly for your frontend’s origin, but do not treat it as a security gate</td><td>Use explicit origin matching + <code>Access-Control-Allow-Credentials: true</code> + <code>Vary: Origin</code>. Not <code>*</code>.</td></tr><tr><td>Rate limiting</td><td>Per-user or per-token, not per-IP</td><td>IPs rotate. Tokens don’t.</td></tr></tbody></table>
+<p>The rule: Your backend treats every request as hostile until the token checks out. CORS being present or absent changes nothing about that.</p>
+<h3 id="2-you-have-no-authentication-public-api">2. You Have No Authentication (Public API)</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Layer</th><th>What to Do</th><th>Why</th></tr></thead><tbody><tr><td>Backend proxy</td><td>Frontend calls your backend. Your backend calls the real service.</td><td>Your real API keys never hit the browser network tab. You control the chokepoint.</td></tr><tr><td>Short-lived signed tokens</td><td>Backend generates HMAC-signed tokens with timestamp + nonce. Frontend uses once.</td><td>A copied token expires. The signing secret never leaves your server.</td></tr><tr><td>Rate limiting</td><td>Per-IP or per-fingerprint</td><td>Raises the cost of scraping. Won’t stop a determined attacker. Nothing will.</td></tr><tr><td>Bot detection</td><td>Cloudflare, custom fingerprinting, or behavioral analysis</td><td>Distinguishes humans from scripts at scale.</td></tr><tr><td>Accept imperfection</td><td>You cannot fully prevent API access. The goal is friction, not a wall.</td><td>A determined attacker with curl and time will get through. Make it slow, noisy, and expensive.</td></tr></tbody></table>
+<p>The rule: Without identity, you have no trust anchor. Every defense is probabilistic. Stack enough of them that casual abuse stops being worth it.</p>
+<hr/>
+<h2 id="quick-reference-what-cors-actually-blocks">Quick Reference: What CORS Actually Blocks</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Request Type</th><th>CORS Block?</th><th>Backend Executes It?</th><th>Notes</th></tr></thead><tbody><tr><td>Simple GET from evil.com</td><td>Browser hides response</td><td>Yes</td><td>Never preflighted. GET must not change state.</td></tr><tr><td>GET with <code>Authorization</code> from evil.com</td><td>Preflight blocks before send</td><td>No</td><td>Custom headers trigger preflight.</td></tr><tr><td>POST <code>application/json</code> from evil.com</td><td>Preflight blocks before send</td><td>No</td><td>Non-simple content type triggers preflight.</td></tr><tr><td>POST form data from evil.com</td><td>Browser hides response</td><td>Yes</td><td>Simple request. No preflight. This is why CSRF tokens exist.</td></tr><tr><td>Any request from curl/Postman/script</td><td>Nothing</td><td>Yes</td><td>Origin header is self-reported. Fabricate whatever you want.</td></tr></tbody></table>
+<p>One sentence to remember: CORS decides whether a browser lets JavaScript read a response. Your backend decides whether to honor the request. Those are different jobs. Do not confuse them.</p>
+<hr/>
+<p>If you’d like to explore these scenarios hands-on, feel free to <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">check out the demo on your own</a>.</p> </div> </article> <!-- Tags footer --> <div class="mt-14 pt-8 border-t border-white/[0.06]"> <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">Tagged in</p> <div class="flex gap-2 flex-wrap"> <a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 bg-rose-950/60 text-rose-300 border-rose-800/50"> Security </a><a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 bg-orange-950/60 text-orange-300 border-orange-800/50"> Cors </a><a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 bg-sky-950/60 text-sky-300 border-sky-800/50"> Web </a><a href="/blog" class="text-xs font-medium px-3 py-1.5 rounded-full border transition-opacity hover:opacity-80 bg-slate-900/60 text-slate-300 border-slate-700/50"> Backend </a> </div> </div> <!-- Prev / Next -->  </div> <!-- Right column: sticky ToC --> <aside class="hidden lg:block"> <div class="sticky top-28 pt-10"> <p class="text-slate-600 text-xs uppercase tracking-widest mb-4 font-mono">In this blog</p> <nav class="space-y-0.5"> <a href="#the-common-misconception-about-cors" data-toc="the-common-misconception-about-cors" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> The Common Misconception About CORS </a><a href="#what-cors-actually-is-and-how-it-really-works" data-toc="what-cors-actually-is-and-how-it-really-works" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> What CORS Actually Is and How It Really Works </a><a href="#the-same-origin-policy" data-toc="the-same-origin-policy" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> The Same-Origin Policy </a><a href="#what-actually-happens-when-you-make-a-cross-origin-request" data-toc="what-actually-happens-when-you-make-a-cross-origin-request" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> What Actually Happens When You Make a Cross-Origin Request </a><a href="#why-this-actually-matters" data-toc="why-this-actually-matters" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Why This Actually Matters </a><a href="#demo" data-toc="demo" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> Demo </a><a href="#preflight-requests--the-browsers-safety-check" data-toc="preflight-requests--the-browsers-safety-check" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> Preflight Requests : The Browser’s Safety Check </a><a href="#what-is-a-preflight-request" data-toc="what-is-a-preflight-request" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> What Is a Preflight Request? </a><a href="#when-preflight-does-not-trigger--simple-requests" data-toc="when-preflight-does-not-trigger--simple-requests" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> When Preflight Does NOT Trigger : Simple Requests </a><a href="#when-preflight-triggers" data-toc="when-preflight-triggers" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> When Preflight Triggers </a><a href="#does-preflight-actually-protect-you" data-toc="does-preflight-actually-protect-you" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Does Preflight Actually Protect You? </a><a href="#where-preflight-completely-fails" data-toc="where-preflight-completely-fails" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Where Preflight Completely Fails </a><a href="#http-methods--why-this-is-not-just-a-convention" data-toc="http-methods--why-this-is-not-just-a-convention" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> HTTP Methods : Why This Is Not Just a Convention </a><a href="#why-get-should-only-ever-fetch" data-toc="why-get-should-only-ever-fetch" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Why GET Should Only Ever Fetch </a><a href="#why-post-should-handle-state-changes" data-toc="why-post-should-handle-state-changes" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Why POST Should Handle State Changes </a><a href="#what-actually-protects-your-backend" data-toc="what-actually-protects-your-backend" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> What Actually Protects Your Backend </a><a href="#authentication-and-authorization" data-toc="authentication-and-authorization" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Authentication and Authorization </a><a href="#csrf-tokens" data-toc="csrf-tokens" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> CSRF Tokens </a><a href="#samesite-cookies" data-toc="samesite-cookies" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> SameSite Cookies </a><a href="#what-about-public-apis-with-no-login" data-toc="what-about-public-apis-with-no-login" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> What About Public APIs With No Login? </a><a href="#rate-limiting-and-input-validation" data-toc="rate-limiting-and-input-validation" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> Rate Limiting and Input Validation </a><a href="#what-to-actually-do" data-toc="what-to-actually-do" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> What to Actually Do </a><a href="#1-you-have-authentication" data-toc="1-you-have-authentication" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> 1. You Have Authentication </a><a href="#2-you-have-no-authentication-public-api" data-toc="2-you-have-no-authentication-public-api" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-600 hover:text-slate-300 pl-3 border-l border-white/[0.06] text-xs"> 2. You Have No Authentication (Public API) </a><a href="#quick-reference-what-cors-actually-blocks" data-toc="quick-reference-what-cors-actually-blocks" class="toc-link block py-1.5 text-sm leading-snug transition-colors text-slate-400 hover:text-white font-medium"> Quick Reference: What CORS Actually Blocks </a> </nav> </div> </aside> </div> </div> </main>  <footer class="border-t border-white/[0.06] py-10 mt-20"> <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4"> <p class="text-slate-600 text-sm">© 2025 Nikhil Hegde. All rights reserved.</p> <div class="flex items-center gap-6"> <a href="https://github.com/Nikhilhegde989" target="_blank" rel="noopener noreferrer" class="text-slate-600 hover:text-white transition-colors text-sm">GitHub</a> <a href="https://www.linkedin.com/in/nikhilhegde989/" target="_blank" rel="noopener noreferrer" class="text-slate-600 hover:text-white transition-colors text-sm">LinkedIn</a> <a href="/" class="text-slate-600 hover:text-white transition-colors text-sm">Portfolio</a> <a href="/blog" class="text-slate-600 hover:text-white transition-colors text-sm">Writing</a> </div> </div> </footer> <script>
+      const backBtn = document.getElementById('back-to-top');
+      if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+    </script> <script>
+      // Scroll depth + reading time tracking for blog posts
+      (function () {
+        if (!window.location.pathname.startsWith('/blog/') || window.location.pathname === '/blog/') return;
+
+        var depthFired = {};
+        var depthMilestones = [25, 50, 75, 90, 100];
+
+        function getScrollDepth() {
+          var scrollTop = window.scrollY || document.documentElement.scrollTop;
+          var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          return docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        }
+
+        window.addEventListener('scroll', function () {
+          var depth = getScrollDepth();
+          for (var i = 0; i < depthMilestones.length; i++) {
+            var m = depthMilestones[i];
+            if (depth >= m && !depthFired[m]) {
+              depthFired[m] = true;
+              if (typeof gtag === 'function') {
+                gtag('event', 'scroll_depth', { percent_scrolled: m, page_path: window.location.pathname });
+              }
+            }
+          }
+        }, { passive: true });
+
+        var timeMilestones = [30, 60, 180, 300];
+        var timeFired = {};
+        var startTime = Date.now();
+
+        setInterval(function () {
+          var elapsed = Math.round((Date.now() - startTime) / 1000);
+          for (var i = 0; i < timeMilestones.length; i++) {
+            var t = timeMilestones[i];
+            if (elapsed >= t && !timeFired[t]) {
+              timeFired[t] = true;
+              if (typeof gtag === 'function') {
+                gtag('event', 'reading_time', { seconds: t, page_path: window.location.pathname });
+              }
+            }
+          }
+        }, 5000);
+      })();
+    </script> </body> </html> <script type="module">const c=document.getElementById("progress-bar");c&&window.addEventListener("scroll",()=>{const o=window.scrollY,s=document.documentElement.scrollHeight-window.innerHeight;c.style.width=s>0?`${Math.min(o/s*100,100)}%`:"0%"},{passive:!0});const r=document.querySelectorAll("[data-toc]");if(r.length>0){let o=function(e){r.forEach(t=>{const n=t.dataset.toc===e;t.classList.toggle("!text-emerald-400",n),t.classList.toggle("text-slate-400",!n&&!t.classList.contains("text-slate-600")&&t.dataset.toc!==e)})};const s=document.querySelectorAll("h2[id], h3[id]"),i=new IntersectionObserver(e=>{for(const t of e)if(t.isIntersecting){o(t.target.id);break}},{rootMargin:"-15% 0% -70% 0%"});s.forEach(e=>i.observe(e))}</script>
