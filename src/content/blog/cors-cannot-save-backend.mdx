@@ -1,0 +1,389 @@
+---
+title: "CORS Cannot Save Your Backend"
+summary: "Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."
+publishedAt: 2025-05-03
+tags: ["security", "cors", "web", "backend"]
+featured: false
+thumbnail: "/blog/firefly.png"
+---
+import { LoopingVideo } from '../../components/blog/LoopingVideo';
+
+> The demos in this post come from an interactive tool I built. If you'd rather experiment with the scenarios yourself, <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">the full code is here</a>.
+
+## The Common Misconception About CORS
+
+I was building an AI application, a public-facing API meant to serve only the users who visit my website. No login, no authentication, just open access for anyone landing on my frontend.
+
+But I wanted that API to be accessed **only through my website**, not by anyone else, in any way, from anywhere else. No scrapers or automated scripts hammering my endpoints, no unauthorized applications consuming my resources without any control or visibility on my end.
+
+Since there was no auth involved, I thought: *"Fine, I'll add CORS and whitelist only my frontend's origin. Simple enough. If the request is coming from my website, process it. If it's coming from anywhere else, my backend rejects it before doing anything."*
+
+Sounded solid, right?
+
+Then I opened my terminal and typed:
+
+```bash
+curl http://localhost:3000/api/data
+```
+
+The response came back instantly. Full data. No errors. No rejection.
+
+So, I did some digging. Turns out curl doesn't send an `Origin` header by default. So I thought, fine, I'll go one step further. I added a middleware that explicitly blocks any request without an `Origin` header. No origin, no response. Problem solved.
+
+Then I decided to verify properly. I whitelisted my frontend on port `5173`. Then I spun up a completely different frontend on a different port and made a request from there.
+
+My browser threw a CORS error. Blocked. I actually felt good for a second.
+
+Until I checked my backend logs.
+
+The request was there. My backend had received it, processed it, executed the logic, and sent a response back. The browser had blocked my frontend JavaScript from *reading* that response, but my backend had already done all the work.
+
+That's when it clicked. **CORS was never blocking the request. It was never meant to.** CORS is not a gate at your backend door. It's a filter in the user's browser. And anything that isn't a browser simply doesn't care that it exists.
+
+---
+
+## What CORS Actually Is and How It Really Works
+
+CORS stands for **Cross-Origin Resource Sharing**, and the most important thing to understand about it is that it is a **browser feature**. Not a server feature. Not a security layer for your backend.
+
+To understand why it exists, we need to understand what it was actually built to solve.
+
+### The Same-Origin Policy
+
+Browsers have a built-in rule called the **Same-Origin Policy**. It says JavaScript running on `website-a.com` should not be able to read responses from `website-b.com`. Without it, any random website you visit could silently make requests to your bank or email using your active session cookies and read the responses.
+
+CORS is the mechanism that lets servers **selectively relax** that restriction for trusted origins.
+
+So CORS was never designed to keep people out. It was designed to let certain cross-origin requests through in a controlled way. The complete opposite of what I was trying to use it for.
+
+### What Actually Happens When You Make a Cross-Origin Request
+
+1. Your frontend calls `fetch("https://api.myapp.com/v1/data")`
+2. The browser automatically attaches an `Origin` header and sends the request to your backend
+3. Your backend receives it, processes it, and runs your logic. The CORS middleware checks if the incoming origin matches your whitelist. If it does, it attaches `Access-Control-Allow-Origin` to the response. If it doesn't, that header is simply omitted.
+4. The browser reads the response. If `Access-Control-Allow-Origin` is present and matches, your JavaScript gets the response. If the header is missing or doesn't match, the browser blocks your JavaScript from reading it and throws a CORS error.
+
+Notice what is never in this sequence: **your backend blocking anything**. It receives the request, processes it, and responds. Every time. The entire CORS decision happens in the browser, after your backend has already done its job.
+
+> **CORS errors happen in the browser, after the server has already processed the request.**
+
+### Why This Actually Matters
+
+Imagine if you built a money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your `/transfer` endpoint.
+
+Here is what actually happens:
+
+- Frontend from a non-allowed origin calls `/transfer`
+- Request reaches your backend
+- Your backend processes it, deducts from one balance, credits another
+- Database is updated. Transfer is done.
+- Backend sends the success response back to the browser
+- Browser sees no `Access-Control-Allow-Origin` header and blocks the response
+- The frontend cannot read the response or show the success message
+
+**But the transfer already happened.**
+
+The user sees an error on screen. The money is already gone from the database. Your CORS configuration did nothing except hide the confirmation.
+
+---
+
+## Demo
+
+Below are three scenarios. All have a frontend making a request to a backend that has CORS configured. Watch what happens in the browser versus what happens in the backend terminal.
+
+**Scenario A —> Origin blocked in browser**
+
+<LoopingVideo client:load src="/videos/A-origin-blocked.mp4" />
+
+The browser throws a CORS error but check the backend logs. The request arrived, was processed, and a response was sent. The browser just blocked your JavaScript from reading it.
+
+**Scenario B —> Origin allowed**
+
+<LoopingVideo client:load src="/videos/B-origin-allowed.mp4" />
+
+When the origin matches the whitelist, the browser receives the response normally. Same backend logic just a different header in the response.
+
+**Scenario C —> What About Non-Browser Clients?**
+
+The visualization above runs in your browser so CORS is still in the picture. But what happens when you take the browser out of the equation entirely?
+
+At this point you might be thinking, *"okay fine, I'll just add a middleware on my backend that checks the Origin header and rejects anything that isn't my allowed domain. Problem solved, right?"*
+
+Here's the biggest catch.
+
+> And before you say "I'll just block all requests that don't have an Origin header", that breaks legitimate non-browser clients too. Mobile apps, server-to-server calls, webhooks, CLI tools, none of these send an Origin header by default. Blocking on missing Origin means you've just locked out your own integrations along with the attackers.
+
+You can **fabricate the Origin header** with a single curl command. You can straight up claim that your request is coming from anywhere even `google.com` and the server has absolutely no way to verify whether that is true or not.
+
+Try this:
+
+```bash
+curl -H "Origin: https://google.com" https://api.myapp.com/v1/data
+```
+
+That request just told your server *"hey, I'm Google"*  and your server believed it. Full response. No block. No error.
+
+Isn't that crazy? Your middleware checked the Origin header, saw a domain, and let it through except that Origin header was completely made up. In a browser, the browser itself sets the Origin header and your JavaScript cannot override it. But outside the browser curl, Postman, Python scripts, anything, you set it yourself. You can claim to be anyone.
+
+So even server-side Origin checking is not a real solution. The Origin header simply cannot be trusted outside a browser context.
+
+CORS never existed as far as curl is concerned and neither did your middleware.
+
+<LoopingVideo client:load src="/videos/C-curl-spoofing-bypass.mp4" />
+
+curl fabricates the `Origin` header, the backend does a string comparison and responds with full data. CORS is entirely irrelevant because it is a browser feature.
+
+---
+
+## Preflight Requests : The Browser's Safety Check
+
+At this point you might be thinking: *"Wait, we have preflight requests. The browser sends an OPTIONS request first, checks whether the origin is allowed, and if not, blocks the actual request before it reaches the backend. That saves us, doesn't it?"*
+
+Well. That's not entirely true.
+
+Preflight does help, but only in one specific scenario. And the number of cases where it does absolutely nothing might surprise you.
+
+### What Is a Preflight Request?
+
+Before sending certain HTTP requests, the browser pauses and sends a separate `OPTIONS` request to your backend first, asking: *"Are you okay with me sending this?"*
+
+```
+OPTIONS /api/data HTTP/1.1
+Origin: http://localhost:5173
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: Content-Type, Authorization
+```
+
+If the server responds with the right headers, the browser fires the actual request. If not, the actual request **never leaves the browser**. The backend never sees it, never processes it.
+
+This is fundamentally different from the CORS block we saw earlier. In that case, the backend received and processed the request. With a failed preflight, the backend receives nothing.
+
+### When Preflight Does NOT Trigger : Simple Requests
+
+These are called **simple requests**. The browser sends them directly without preflighting. A request is simple only when it meets **all** of the following conditions simultaneously:
+
+| Condition | Allowed Values |
+| --- | --- |
+| Method | `GET`, `POST`, or `HEAD` only |
+| Content-Type | `text/plain`, `application/x-www-form-urlencoded`, `multipart/form-data` only |
+| Headers | No custom headers, only browser-set headers |
+
+### When Preflight Triggers
+
+The moment you cross **any one** of these lines:
+
+- Method is `PUT`, `DELETE`, or `PATCH`
+- `Content-Type` is `application/json`
+- Any custom header is present : `Authorization`, `X-API-Key`, anything
+
+In practice, almost every real API call carries either `application/json` or an `Authorization` header. Which means **almost every real-world API call triggers a preflight**.
+
+### Does Preflight Actually Protect You?
+
+Yes, but only in one specific scenario. Preflight protects against **state-changing requests from a malicious cross-origin website in a browser**. The demo below shows all three preflight cases:
+
+**Scenario D —> Simple GET (no preflight)**
+
+<LoopingVideo client:load src="/videos/D-get-without-preflight.mp4" />
+
+A plain GET with no custom headers is a simple request. The browser fires it directly with no OPTIONS check. The backend receives it regardless of origin.
+
+**Scenario E —> POST with `application/json` triggers preflight, gets blocked**
+
+<LoopingVideo client:load src="/videos/E-post-preflight-block.mp4" />
+
+The `application/json` content type pushes this out of the simple-request category. Preflight fires and when the origin is not allowed, the OPTIONS response carries no approval. The actual POST never reaches the backend.
+
+**Scenario F —> GET with `Authorization` header triggers preflight, gets blocked**
+
+<LoopingVideo client:load src="/videos/F-get+auth-preflight-block.mp4" />
+
+Adding a custom header to a GET is enough to trigger preflight. Even a read request can be blocked before the backend ever sees it as long as auth headers are present and the origin is not whitelisted.
+
+**Scenario G —> Preflight succeeds, request goes through**
+
+<LoopingVideo client:load src="/videos/G-preflight-success.mp4" />
+
+Origin is whitelisted, server approves the OPTIONS request, browser fires the actual request. The full round-trip works as expected.
+
+### Where Preflight Completely Fails
+
+**Simple GET requests with no custom headers** hit your backend directly regardless of origin. If that endpoint has any side effects like modifying data, triggering a process, logging sensitive info, preflight will never save you.
+
+**curl, Postman, any non-browser client.** Preflight is a browser behavior. Any non-browser client skips it entirely. You can fire any method, any header, claim any origin, and your backend responds freely.
+
+**If your server blindly approves all preflight requests.** Some of us do this to quickly fix CORS errors:
+
+```javascript
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*")
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH")
+  res.header("Access-Control-Allow-Headers", "*")
+  next()
+})
+```
+
+Preflight fires, server approves everything, browser allows the actual request. You've defeated the entire mechanism without realising it.
+
+**The one-line summary:** Preflight is real protection, but only against cross-origin state-changing requests, made from a browser, to a server with correct CORS configuration, from a client that isn't curl.
+
+---
+
+## HTTP Methods : Why This Is Not Just a Convention
+
+Most developers treat HTTP methods as a convention. GET, POST, PUT, DELETE, REST says use them correctly, but at the end of the day you can fetch data with a POST or delete something with a GET and it works fine. The application doesn't break. Tests pass. Ship it.
+
+And I think every developer has had this thought: *"If I can fetch data using POST, then why not? What's the actual difference?"*
+
+That attitude is understandable but it silently disables protections that were already built for you, and the browser never warns you that it happened.
+
+### Why GET Should Only Ever Fetch
+
+GET is designed for one thing: **read-only, side-effect-free operations.**
+
+The reason this matters from a security standpoint: **plain GET requests are never preflighted.**
+
+A plain GET request with no custom headers is always a simple request. It hits your backend directly from any origin, no OPTIONS check, no browser permission needed. That is by design, because GET is supposed to be safe to repeat, safe to cache, safe to fire from anywhere.
+
+But the moment your GET endpoint causes a side effect, modifies data, triggers a process, deletes a record, you've created an endpoint that any cross-origin request can trigger without preflight, without CORS protection, without anything stopping it.
+
+And it's not just `fetch()` you have to worry about. GET requests can be triggered in ways that have nothing to do with JavaScript:
+
+- `<img src="https://your-api.com/delete-account">` fires a GET
+- `<a href="https://your-api.com/delete-account">` fires a GET
+- A browser prefetch, a crawler, a monitoring tool, all fire GETs
+
+None of these send an Authorization header. None of these trigger a preflight. None of these require JavaScript. From any origin, silently, your backend receives and processes the request.
+
+### Why POST Should Handle State Changes
+
+POST, PUT, PATCH, DELETE signal to the browser that something is changing. And the browser treats them differently.
+
+A POST request with `application/json` triggers preflight. A DELETE triggers preflight. A PATCH with an Authorization header triggers preflight.
+
+By using POST where you should use POST, you automatically get preflight protection as a side effect of doing things correctly.
+
+You also get:
+
+- Cannot be triggered silently by an `<img>` tag or `<a href>` link
+- Requires an actual intentional HTTP client to fire
+- One thing worth noting: HTML forms with `method="POST"` and `enctype="application/x-www-form-urlencoded"` are treated as simple requests by the browser. No preflight. A malicious page can auto-submit a hidden form to your API, and the browser will send it directly, complete with the victim's session cookie. POST is safer than GET, but it is not immune.
+
+> *Using the wrong HTTP method doesn't just break REST conventions, it silently disables security mechanisms the browser already built for you.*
+
+---
+
+## What Actually Protects Your Backend
+
+So if CORS isn't protecting your backend, what does?
+
+The answer is: **your backend has to protect itself.** CORS is a browser feature. It was never supposed to be your security layer. Your server needs to make its own trust decisions, independent of whatever the browser does or doesn't do.
+
+### Authentication and Authorization
+
+This is the real gate. Every request that touches sensitive data or performs a state change should carry a token, JWT, session cookie, OAuth token, whatever your stack uses. Your backend verifies it on every single request, independently, without trusting anything the browser says about where the request came from.
+
+A valid token proves identity. An `Origin` header proves nothing.
+
+One important implementation detail if you are using cookies or `Authorization` headers for auth across origins: setting `Access-Control-Allow-Origin: *` will not work. The browser spec explicitly forbids wildcard origins when credentials are involved. You must set `Access-Control-Allow-Credentials: true` and explicitly mirror the requesting origin in `Access-Control-Allow-Origin` instead of using a wildcard. Without this, authenticated cross-origin requests will fail even with a perfectly configured CORS setup.
+
+One more detail worth knowing. If your server dynamically sets `Access-Control-Allow-Origin` based on the incoming request's origin rather than using a wildcard, you must also include a `Vary: Origin` header in your response. Without it, a CDN or reverse proxy might cache a response that includes `Access-Control-Allow-Origin: https://yourapp.com` and serve that same cached response to a different origin. That origin either gets access it shouldn't, or gets a CORS error it shouldn't. Either way it's a bug and it only appears under caching conditions.
+
+### CSRF Tokens
+
+Authentication tokens prove identity. But even with authentication in place, there is another attack vector that CORS does nothing about: **Cross-Site Request Forgery (CSRF)**.
+
+For APIs with session-based auth, CSRF tokens help:
+
+- When a user loads your frontend, the server generates a unique, unpredictable token and embeds it in the page
+- For every state-changing request, POST, PUT, DELETE, the frontend must include this token in a header or request body
+- A malicious site on evil.com can trigger a request to your backend, but JavaScript running on evil.com cannot read the CSRF token embedded in your page. The Same-Origin Policy blocks cross-origin reads entirely.
+- The forged request arrives without the token. Your backend rejects it.
+
+CORS never entered the picture. The Same-Origin Policy, the thing CORS is built on top of, is what makes CSRF tokens work.
+
+### SameSite Cookies
+
+Browsers automatically send session cookies with every request to a domain, regardless of which website triggered that request. That's what makes session-based CSRF attacks dangerous.
+
+Modern browsers have largely addressed this with the `SameSite` cookie attribute:
+
+- **`SameSite=Lax`** the browser default in most modern browsers. Cookies are not sent in cross-site POST, PUT, DELETE, or PATCH requests. Only sent for top-level GET navigations like clicking a link.
+- **`SameSite=Strict`** cookies are never sent in any cross-site request, even GET navigations.
+
+If you're using cookie-based session authentication, make sure your cookies explicitly set `SameSite=Strict` or `SameSite=Lax`. Do not rely on browser defaults alone.
+
+### What About Public APIs With No Login?
+
+This is the genuinely hard case, and honestly, the exact situation I was in.
+
+If your frontend is public with no authentication, there is no perfect solution.
+
+**API keys don't solve it either.** If your frontend makes a request with an API key, that key is sitting in your browser's network tab. Anyone can copy it, paste it into curl, and use it directly, bypassing your frontend entirely.
+
+Here's what people actually do:
+
+**Backend as a proxy.** Never call your AI service or any third-party API directly from the frontend. Your frontend calls your own backend, your backend calls the actual service. This doesn't stop someone from curling your backend directly, but it keeps your real credentials and API keys from ever appearing in the browser network tab, and gives you a single controlled point where you can add rate limiting, logging, and abuse detection.
+
+**Request signing and short-lived tokens.** Instead of embedding a static API key in your frontend, have your backend generate short-lived signed tokens that expire after minutes or hours. 
+
+The idea is straightforward. Your backend has a secret key that never leaves the server. When your frontend needs to make a request, it first asks your backend for a short-lived token. Your backend generates this token by signing a combination of the current timestamp, a unique nonce, and any relevant request details using that secret key, typically with HMAC-SHA256. The frontend then includes this signed token in the actual request. Your backend verifies the signature, checks the timestamp hasn't expired, and rejects anything that doesn't match. A scraper can copy a token from the network tab but it expires in minutes. They cannot generate new valid tokens because they don't have your secret key.
+
+**Rate limiting by IP.** Not perfect, IPs can be shared or rotated, but it stops casual abuse and scraping effectively. It raises the cost of abuse even if it doesn't eliminate it.
+
+**Bot detection and fingerprinting.** Services like Cloudflare analyze request patterns, timing, and behaviour to distinguish real users from scripts. Not foolproof, but it significantly raises the bar for programmatic abuse.
+
+**Accept that perfect restriction is impossible.** For a truly public, no-auth frontend, you cannot fully prevent a determined person from accessing your API. The goal is not a perfect wall. It's making abuse difficult, detectable, and costly enough that most people won't bother.
+
+### Rate Limiting and Input Validation
+
+Regardless of your auth setup, these two should always be in place. Rate limiting doesn't care about origins, tokens, or headers. It simply says: *you've made too many requests in this window, slow down*. Input validation ensures you never trust what comes in blindly. Check that the authenticated user actually has permission to access what they're requesting, not just that they have a valid token.
+
+---
+
+## What to Actually Do
+
+Stop thinking about CORS as security. It isn't. Use this instead.
+
+### 1. You Have Authentication
+
+| Layer            | What to Do                                                                                | Why                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Identity         | Verify JWT / session token / API key on every request                                     | A valid token proves who the caller is. `Origin` proves nothing.                                   |
+| CSRF protection  | If using cookie-based sessions, require a CSRF token for every state-changing request     | The attacker cannot read the token from your page. The forged request arrives without it. Reject.  |
+| Cookie hardening | Set `SameSite=Strict` or `SameSite=Lax`. Never `SameSite=None` without good reason        | `Lax` blocks cookies on cross-site POST/PUT/DELETE. `Strict` blocks everything, even link clicks.  |
+| CORS             | Configure it correctly for your frontend's origin, but do not treat it as a security gate | Use explicit origin matching + `Access-Control-Allow-Credentials: true` + `Vary: Origin`. Not `*`. |
+| Rate limiting    | Per-user or per-token, not per-IP                                                         | IPs rotate. Tokens don't.                                                                          |
+
+The rule: Your backend treats every request as hostile until the token checks out. CORS being present or absent changes nothing about that.
+
+### 2. You Have No Authentication (Public API)
+
+| Layer                     | What to Do                                                                       | Why                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Backend proxy             | Frontend calls your backend. Your backend calls the real service.                | Your real API keys never hit the browser network tab. You control the chokepoint.              |
+| Short-lived signed tokens | Backend generates HMAC-signed tokens with timestamp + nonce. Frontend uses once. | A copied token expires. The signing secret never leaves your server.                           |
+| Rate limiting             | Per-IP or per-fingerprint                                                        | Raises the cost of scraping. Won't stop a determined attacker. Nothing will.                   |
+| Bot detection             | Cloudflare, custom fingerprinting, or behavioral analysis                        | Distinguishes humans from scripts at scale.                                                    |
+| Accept imperfection       | You cannot fully prevent API access. The goal is friction, not a wall.           | A determined attacker with curl and time will get through. Make it slow, noisy, and expensive. |
+
+The rule: Without identity, you have no trust anchor. Every defense is probabilistic. Stack enough of them that casual abuse stops being worth it.
+
+---
+
+## Quick Reference: What CORS Actually Blocks
+
+| Request Type                           | CORS Block?                  | Backend Executes It? | Notes                                                        |
+| -------------------------------------- | ---------------------------- | ---------------- | ------------------------------------------------------------ |
+| Simple GET from evil.com               | Browser hides response       | Yes              | Never preflighted. GET must not change state.                |
+| GET with `Authorization` from evil.com | Preflight blocks before send | No               | Custom headers trigger preflight.                            |
+| POST `application/json` from evil.com  | Preflight blocks before send | No               | Non-simple content type triggers preflight.                  |
+| POST form data from evil.com           | Browser hides response       | Yes              | Simple request. No preflight. This is why CSRF tokens exist. |
+| Any request from curl/Postman/script   | Nothing                      | Yes              | Origin header is self-reported. Fabricate whatever you want. |
+
+
+One sentence to remember: CORS decides whether a browser lets JavaScript read a response. Your backend decides whether to honor the request. Those are different jobs. Do not confuse them.
+
+---
+
+If you'd like to explore these scenarios hands-on, feel free to <a href="https://github.com/Nikhilhegde989/cors-demo.git" target="_blank" rel="noopener noreferrer">check out the demo on your own</a>.

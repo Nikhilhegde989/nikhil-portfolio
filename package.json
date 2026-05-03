@@ -11,19 +11,23 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/sitemap": "^3.7.2",
     "@emailjs/browser": "^4.4.1",
+    "@tailwindcss/typography": "^0.5.19",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "remark-reading-time": "^2.1.0"
   },
   "devDependencies": {
+    "@astrojs/react": "^4.0.0",
+    "@astrojs/tailwind": "^6.0.0",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "astro": "^5.0.0",
-    "@astrojs/react": "^4.0.0",
-    "@astrojs/tailwind": "^6.0.0",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
