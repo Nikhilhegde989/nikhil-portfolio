@@ -1,7 +1,7 @@
 ---
 title: "CORS Cannot Save Your Backend"
 summary: "Your backend processes every request. Even the ones CORS blocks. I found this out the hard way. Here is a complete breakdown of what CORS actually is, where it genuinely helps, and what fills the gaps it was never built to fill."
-publishedAt: 2025-04-28
+publishedAt: 2025-05-03
 tags: ["security", "cors", "web", "backend"]
 featured: false
 thumbnail: "/blog/firefly.png"
@@ -69,7 +69,7 @@ Notice what is never in this sequence: **your backend blocking anything**. It re
 
 ### Why This Actually Matters
 
-Imagine if you build a money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your `/transfer` endpoint.
+Imagine if you built a money transfer API with no authentication, no tokens, no session. Just an endpoint that transfers money when called. A frontend from a non-allowed origin makes a request to your `/transfer` endpoint.
 
 Here is what actually happens:
 
