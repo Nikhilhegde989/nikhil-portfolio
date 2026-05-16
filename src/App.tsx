@@ -6,6 +6,7 @@ import { Hero } from './components/sections/Hero';
 import { TechnicalTalk } from './components/sections/TechnicalTalk';
 import { Experience } from './components/sections/Experience';
 import { Skills } from './components/sections/Skills';
+import { BlogPreview } from './components/sections/BlogPreview';
 import { Projects } from './components/sections/Projects';
 import { Certifications } from './components/sections/Certifications';
 import { Publications } from './components/sections/Publications';
@@ -14,8 +15,13 @@ import { Contact } from './components/sections/Contact';
 import { ChatWidget } from './components/ui/ChatBot/ChatWidget';
 import { useActiveSection } from './hooks/useActiveSection';
 import { navItems } from './data/portfolioData';
+import type { BlogPostPreview } from './types';
 
-const App: React.FC = () => {
+interface AppProps {
+  blogPosts?: BlogPostPreview[];
+}
+
+const App: React.FC<AppProps> = ({ blogPosts = [] }) => {
   const sectionIds = navItems.map(item => item.href.slice(1));
   const activeSection = useActiveSection(sectionIds);
 
@@ -28,6 +34,7 @@ const App: React.FC = () => {
         <TechnicalTalk />
         <Experience />
         <Skills />
+        <BlogPreview posts={blogPosts} />
         <Projects />
         <Certifications />
         <Publications />

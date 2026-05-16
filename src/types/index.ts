@@ -3,8 +3,8 @@ export interface Experience {
   company: string;
   role: string;
   location: string;
-  startDate: string;      
-  endDate?: string;        
+  startDate: string;
+  endDate?: string;
   technologies: string[];
   achievements: string[];
   link?: string;
@@ -42,4 +42,15 @@ export interface SkillCategory {
 export interface NavItem {
   href: string;
   label: string;
+}
+
+export interface BlogPostPreview {
+  slug: string;
+  title: string;
+  summary: string;
+  tags: string[];
+  publishedAt: string;
+  readingTime: number;
+  thumbnail?: string;
+  featured: boolean;
 }

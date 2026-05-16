@@ -5,27 +5,43 @@ export const navItems: NavItem[] = [
   { href: '#talk', label: 'Talk' },
   { href: '#experience', label: 'Experience' },
   { href: '#skills', label: 'Skills' },
+  { href: '#blog', label: 'Blog' },
   { href: '#projects', label: 'Projects' },
   { href: '#certifications', label: 'Certifications' },
   { href: '#publications', label: 'Research' },
   { href: '#about', label: 'About' },
   { href: '#contact', label: 'Contact' },
-  { href: '/blog', label: 'Blog' },
 ];
 
 export const experiences: Experience[] = [
+  {
+    id: 'stryv-senior',
+    company: 'Stryv.ai',
+    role: 'Senior Software Engineer',
+    location: "Hyderabad",
+    startDate: "2026-03-01",
+    endDate: undefined,
+    technologies: ['Python', 'FastAPI', 'PostgreSQL', 'RAG', 'Qdrant', 'LangGraph', 'AWS S3', 'Azure'],
+    achievements: [
+      'Recognized with the Key Contributor Award for impactful contributions to backend systems',
+      'Architected and implemented an AI-powered semantic search and dynamic website rendering platform using RAG, enabling the UI to adapt intelligently based on user queries and significantly improving user experience',
+      'Built the end-to-end AI retrieval pipeline using Qdrant vector search, open-source embedding models, and reranking strategies, maintaining high retrieval accuracy while significantly reducing inference costs compared to cloud-based embeddings',
+      'Designed and developed an automated embeddings generation and ingestion pipeline integrating Sanity CMS and AWS S3, enabling scalable vector indexing, near real-time content synchronization, and efficient retrieval for AI-powered semantic search workflows',
+    ],
+    link: 'https://www.stryv.ai'
+  },
   {
     id: 'stryv',
     company: 'Stryv.ai',
     role: 'Software Engineer',
     location: "Hyderabad",
     startDate: "2024-08-01",
-    endDate: undefined,
+    endDate: "2026-02-28",
     technologies: ['Python', 'FastAPI', 'PostgreSQL', 'SQLAlchemy', 'Redis', 'Kafka', 'WebSockets', 'Azure', 'LangChain'],
     achievements: [
-      'Recognized with the Key Contributor Award for impactful contributions to backend systems',
+      'Optimized a backend service, achieving 78.6% reduction in request latency under concurrent load, 63% reduction for individual requests, and 4.7× throughput improvement through architectural and performance optimizations',
       'Designed and implemented a supply-chain scoring engine to compute order-level business metrics from complex business rules',
-      'Built an agent-based AI chatbot for a hospitality platform to automate customer support workflows',
+      'Built a LangGraph-based agentic AI chatbot for a hospitality platform, automating customer support workflows with multi-step reasoning and tool-calling capabilities',
       'Built a real-time user-facing event streaming system using Kafka and WebSockets to surface live process updates in the UI',
       'Reduced database load and improved API latency through Redis caching, async design, and PostgreSQL query optimization',
       'Migrated legacy .NET modules into FastAPI-based microservices, improving maintainability and system performance'
@@ -138,19 +154,19 @@ export const skillCategories: SkillCategory[] = [
     id: 'backend',
     title: 'Backend & APIs',
     icon: 'Code2',
-    skills: ['Python', 'Node.js', 'FastAPI', 'Express', 'REST APIs', 'WebSockets', 'SQLAlchemy']
+    skills: ['Python', 'Node.js', 'FastAPI', 'Express', 'REST APIs', 'WebSockets', 'SQLAlchemy', 'Spring Boot']
   },
   {
     id: 'database',
     title: 'Databases & Caching',
     icon: 'Database',
-    skills: ['PostgreSQL', 'MongoDB', 'Redis', 'Kafka', 'Vector DBs']
+    skills: ['PostgreSQL', 'MongoDB', 'Redis', 'Vector DBs']
   },
   {
     id: 'ai',
     title: 'AI & ML',
     icon: 'Brain',
-    skills: ['LLMs', 'RAG', 'LangChain', 'LangGraph', 'ML Fundamentals']
+    skills: ['LLMs', 'RAG', 'Agents', 'LangChain', 'LangGraph', 'ML Fundamentals']
   },
   {
     id: 'cloud',
@@ -160,4 +176,4 @@ export const skillCategories: SkillCategory[] = [
   }
 ];
 
-export const additionalSkills = ['React', 'Redux', 'Firebase', 'C++', 'Java'];
+export const additionalSkills = ['Kafka', 'Java', 'React', 'Redux', 'Firebase', 'C++'];

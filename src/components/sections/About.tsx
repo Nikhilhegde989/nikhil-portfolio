@@ -100,7 +100,7 @@ export const About: React.FC = () => (
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-              <span>Exploring Gen AI integration with backend architectures</span>
+              <span>Integrating LLMs and AI agents into production backend architectures</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />

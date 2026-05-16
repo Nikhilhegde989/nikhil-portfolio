@@ -1,6 +1,22 @@
 ---
 import App from '../App.tsx';
 import '../App.css';
+import { getCollection } from 'astro:content';
+import readingTime from 'reading-time';
+
+const allPosts = await getCollection('blog');
+const blogPosts = allPosts
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .map((p) => ({
+    slug: p.slug,
+    title: p.data.title,
+    summary: p.data.summary,
+    tags: p.data.tags,
+    publishedAt: p.data.publishedAt.toISOString(),
+    readingTime: p.data.readingTime ?? Math.ceil(readingTime(p.body).minutes),
+    thumbnail: p.data.thumbnail,
+    featured: p.data.featured,
+  }));
 ---
 
 <!doctype html>
@@ -26,6 +42,6 @@ import '../App.css';
     <!-- End Google Analytics -->
   </head>
   <body>
-    <App client:load />
+    <App client:load blogPosts={blogPosts} />
   </body>
 </html>

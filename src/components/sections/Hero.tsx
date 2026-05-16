@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, Linkedin, Mail, Download, Code2, Mic, Cpu, Sparkles } from 'lucide-react';
+import { Github, Linkedin, Mail, Download, Code2, Mic, Cpu, Sparkles, PenLine } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 declare global {
@@ -43,6 +43,18 @@ export const Hero: React.FC = () => {
             </h1>
           </div>
 
+          {/* 2b. Value props */}
+          <div className="flex gap-3 flex-wrap">
+            <span className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium">
+              <Cpu size={14} />
+              Backend Engineering
+            </span>
+            <span className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-sm font-medium">
+              <Sparkles size={14} />
+              AI Integration
+            </span>
+          </div>
+
           {/* 3. Image */}
           <div className="flex justify-center py-4">
             <div className="relative group">
@@ -66,7 +78,7 @@ export const Hero: React.FC = () => {
               <StatCard icon={Code2} color="emerald" value="2 Years" label="Shipping Code" />
               <StatCard icon={Mic} color="blue" value="Speaker" label="Hyderabad PG Days" />
               <StatCard icon={Cpu} color="purple" value="Performance" label="Latency & Optimization" />
-              <StatCard icon={Sparkles} color="orange" value="Exploring" label="Gen AI Integration" />
+              <StatCard icon={Sparkles} color="orange" value="Building" label="AI-Backed Systems" />
             </div>
           </div>
 
@@ -80,7 +92,7 @@ export const Hero: React.FC = () => {
               <span className="text-emerald-400 font-medium">Hyderabad PostgreSQL Days 2025</span>.
             </p>
             <p className="text-slate-400 italic border-l-2 border-emerald-500/30 pl-4">
-              Currently exploring the intersection of Gen AI and backend systems. Always exploring. Always shipping.
+              Bridging LLMs and backend systems, shipping AI features that hold up in production. Always learning. Always shipping.
             </p>
           </div>
 
@@ -101,19 +113,21 @@ export const Hero: React.FC = () => {
             <Button href="https://www.linkedin.com/in/nikhilhegde989/" external icon={Linkedin} className="bg-blue-600 hover:bg-blue-700">
               LinkedIn
             </Button>
+            <Button href="https://medium.com/@nikhilhegde989" external icon={PenLine} variant="secondary" className="bg-slate-800 hover:bg-slate-700 border-slate-700">
+              Medium
+            </Button>
             <Button href="#contact" icon={Mail} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
               Contact
             </Button>
-            <Button
+            <a
               href="resume.pdf"
               download
-              icon={Download}
-              variant="outline"
-              className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
               onClick={trackResumeDownload}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-white text-slate-900 hover:bg-slate-100 shadow-md transition-colors"
             >
+              <Download size={20} />
               Resume
-            </Button>
+            </a>
           </div>
         </div>
 
@@ -130,17 +144,28 @@ export const Hero: React.FC = () => {
               </h1>
             </div>
 
+            <div className="flex gap-3 flex-wrap">
+              <span className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-sm font-medium">
+                <Cpu size={14} />
+                Backend Engineering
+              </span>
+              <span className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-sm font-medium">
+                <Sparkles size={14} />
+                AI Integration
+              </span>
+            </div>
+
             <div className="space-y-4">
               <p className="text-lg md:text-xl text-slate-300 leading-relaxed max-w-xl font-light">
                 Engineer who loves to explore <span className="text-white font-medium">how things work under the hood</span>, then make them faster.
-                I ship end-to-end products, but obsess over backend craft—<span className="text-white font-medium">tuning latency</span>, <span className="text-white font-medium">optimizing performance</span>,
+                I ship end-to-end products, but obsess over backend craft : <span className="text-white font-medium">tuning latency</span>, <span className="text-white font-medium">optimizing performance</span>,
                 and <span className="text-white font-medium">building reliable architectures</span> that work exactly as intended.
                 Recently spoke about PostgreSQL internals at{' '}
                 <span className="text-emerald-400 font-medium">Hyderabad PostgreSQL Days 2025</span>.
               </p>
 
               <p className="text-slate-400 max-w-lg italic border-l-2 border-emerald-500/30 pl-4">
-                Currently exploring the intersection of Gen AI and backend systems. Always exploring. Always shipping.
+                Bridging LLMs and backend systems, shipping AI features that hold up in production. Always learning. Always shipping.
               </p>
 
               <div className="flex flex-wrap gap-2 pt-2">
@@ -159,19 +184,21 @@ export const Hero: React.FC = () => {
               <Button href="https://www.linkedin.com/in/nikhilhegde989/" external icon={Linkedin} className="bg-blue-600 hover:bg-blue-700">
                 LinkedIn
               </Button>
+              <Button href="https://medium.com/@nikhilhegde989" external icon={PenLine} variant="secondary" className="bg-slate-800 hover:bg-slate-700 border-slate-700">
+                Medium
+              </Button>
               <Button href="#contact" icon={Mail} variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-800">
                 Contact
               </Button>
-              <Button
+              <a
                 href="resume.pdf"
                 download
-                icon={Download}
-                variant="outline"
-                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500"
                 onClick={trackResumeDownload}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-white text-slate-900 hover:bg-slate-100 shadow-md transition-colors"
               >
+                <Download size={20} />
                 Resume
-              </Button>
+              </a>
             </div>
           </div>
 
@@ -198,7 +225,7 @@ export const Hero: React.FC = () => {
                   <StatCard icon={Code2} color="emerald" value="2 Years" label="Shipping Code" />
                   <StatCard icon={Mic} color="blue" value="Speaker" label="Hyderabad PG Days" />
                   <StatCard icon={Cpu} color="purple" value="Performance" label="Latency & Optimization" />
-                  <StatCard icon={Sparkles} color="orange" value="Exploring" label="Gen AI Integration" />
+                  <StatCard icon={Sparkles} color="orange" value="Building" label="AI-Backed Systems" />
                 </div>
               </div>
             </div>

@@ -78,21 +78,25 @@ export const Experience: React.FC = () => (
             ))}
           </div>
 
-          <ul className="space-y-4">
-            {exp.achievements.map((achievement, idx) => (
-              <li key={idx} className="flex items-start gap-3 text-slate-300 text-base leading-relaxed pl-2 border-l-2 border-slate-800 hover:border-emerald-500/30 transition-colors">
-                <span className="text-emerald-500/50 mt-1">▸</span>
-                <span dangerouslySetInnerHTML={{ 
-                  __html: achievement
-                    .replace(/\b(Architected|scoring engine|Led|Migrated|Awarded|Optimized|Reduced|Improved)\b/g, '<strong class="text-emerald-400 font-semibold">$1</strong>')
-                    .replace(/\b(Key Contributor|supply-chain|marketplace|microservices|RESTful APIs)\b/g, '<strong class="text-emerald-400 font-semibold">$1</strong>')
-                    .replace(/\b(real-time|AI chatbot|agent-based|voice-to-form|event streaming)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
-                    .replace(/\b(LLMs|RAG|LangChain|Redis caching|PostgreSQL query optimization|async design)\b/g, '<span class="text-blue-400 font-medium">$1</span>')
-                    .replace(/(\d+%|\d+x|\d+\s?ms|₹[\d,]+|\.NET|FastAPI|Node\.js)/g, '<span class="text-white font-bold">$1</span>')
-                }} />
-              </li>
-            ))}
-          </ul>
+          {exp.achievements.length > 0 ? (
+            <ul className="space-y-4">
+              {exp.achievements.map((achievement, idx) => (
+                <li key={idx} className="flex items-start gap-3 text-slate-300 text-base leading-relaxed pl-2 border-l-2 border-slate-800 hover:border-emerald-500/30 transition-colors">
+                  <span className="text-emerald-500/50 mt-1">▸</span>
+                  <span dangerouslySetInnerHTML={{
+                    __html: achievement
+                      .replace(/\b(Architected|Recognized|Designed|scoring engine|Led|Migrated|Awarded|Optimized|Reduced|Improved)\b/g, '<strong class="text-emerald-400 font-semibold">$1</strong>')
+                      .replace(/\b(Key Contributor|supply-chain|retrieval pipeline|ingestion pipeline|marketplace|microservices|RESTful APIs)\b/g, '<strong class="text-emerald-400 font-semibold">$1</strong>')
+                      .replace(/\b(real-time|near real-time|semantic search|multi-step reasoning|tool-calling|vector indexing|AI chatbot|agent-based|voice-to-form|event streaming)\b/g, '<span class="text-purple-400 font-medium">$1</span>')
+                      .replace(/\b(LLMs|RAG|LangChain|LangGraph|Qdrant|AWS S3|Sanity CMS|embedding models|reranking|Redis caching|PostgreSQL query optimization|async design)\b/g, '<span class="text-blue-400 font-medium">$1</span>')
+                      .replace(/(\d+\.?\d*%|\d+\.?\d*[×x]|\d+\s?ms|₹[\d,]+|\.NET|FastAPI|Node\.js)/g, '<span class="text-white font-bold">$1</span>')
+                  }} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-slate-600 text-sm italic">More coming soon.</p>
+          )}
         </Card>
       ))}
     </div>
