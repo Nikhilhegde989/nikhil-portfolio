@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev        # start dev server at localhost:5173
 npm run build      # production build to dist/
 npm run preview    # preview the production build locally
-npm run deploy     # build + push to gh-pages branch (legacy, prefer Vercel)
 ```
 
 No test suite exists. TypeScript and ESLint are the primary correctness checks — run `npm run build` to catch type errors across both React and Astro files.
@@ -65,4 +64,4 @@ The floating chat widget (`src/components/ui/ChatBot/`) calls an external rephra
 
 ### Deployment
 
-Current setup: `main` branch deploys via `gh-pages`. `blog-preview` branch is connected to Vercel for preview. To add a new Vercel preview: push a branch, import the repo in Vercel, select the branch.
+Hosted on Vercel (behind Cloudflare DNS). Pushing to `main` deploys production to nikhilhegde.com; every other pushed branch gets a Vercel preview deployment. There is no GitHub Pages deploy anymore — don't reintroduce a `gh-pages` branch, since Vercel would try to build it and fail.
