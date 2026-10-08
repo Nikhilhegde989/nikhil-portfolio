@@ -15,12 +15,23 @@ export const navItems: NavItem[] = [
 
 export const experiences: Experience[] = [
   {
+    id: 'exl',
+    company: 'EXL',
+    role: 'Consultant 1 (Gen AI)',
+    location: "Bangalore",
+    startDate: "2026-08-24",
+    endDate: undefined,
+    technologies: ['Python', 'Machine Learning'],
+    achievements: [],
+    link: 'https://www.exlservice.com'
+  },
+  {
     id: 'stryv-senior',
     company: 'Stryv.ai',
     role: 'Senior Software Engineer',
     location: "Hyderabad",
     startDate: "2026-03-01",
-    endDate: undefined,
+    endDate: "2026-08-21",
     technologies: ['Python', 'FastAPI', 'PostgreSQL', 'RAG', 'Qdrant', 'LangGraph', 'AWS S3', 'Azure'],
     achievements: [
       'Recognized with the Key Contributor Award for impactful contributions to backend systems',

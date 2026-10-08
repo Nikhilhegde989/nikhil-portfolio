@@ -96,7 +96,7 @@ export const About: React.FC = () => (
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-              <span>Building backend systems at <span className="text-slate-900 font-medium">Stryv.ai</span></span>
+              <span>Working on Machine Learning as a Gen AI Consultant at <span className="text-slate-900 font-medium">EXL</span></span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
@@ -113,7 +113,7 @@ export const About: React.FC = () => (
         <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div className="flex items-center gap-3 text-slate-600 text-sm">
             <MapPin size={16} className="text-emerald-600" />
-            <span>Currently in <span className="text-slate-900 font-medium">Hyderabad, India</span></span>
+            <span>Currently in <span className="text-slate-900 font-medium">Bangalore, India</span></span>
           </div>
           <div className="flex items-center gap-3 text-slate-500 text-sm pl-6 border-l-2 border-slate-100 ml-2">
             <span>Originally from <span className="text-slate-700 font-medium">Sirsi, Karnataka</span></span>

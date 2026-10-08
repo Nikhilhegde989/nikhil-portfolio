@@ -10,14 +10,14 @@ const calculateDuration = (startDate: string, endDate?: string): string => {
   const start = new Date(startDate);
   const end = endDate ? new Date(endDate) : new Date();
   
-  let years = end.getFullYear() - start.getFullYear();
-  let months = end.getMonth() - start.getMonth();
-  
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
-  
+  // Round any partial month up (Mar 1 – Aug 21 = 6 months, Aug 24 – Oct 8 = 2 months)
+  const totalMonths =
+    (end.getUTCFullYear() - start.getUTCFullYear()) * 12 +
+    (end.getUTCMonth() - start.getUTCMonth()) +
+    (end.getUTCDate() > start.getUTCDate() ? 1 : 0);
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+
   const parts: string[] = [];
   if (years > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`);
   if (months > 0) parts.push(`${months} month${months > 1 ? 's' : ''}`);
